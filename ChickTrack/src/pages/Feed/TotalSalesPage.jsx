@@ -1,27 +1,26 @@
 import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../components/AdminSidebar";
-import { LoadingAnimation, Notification, Filter } from "../../components/CommonComponents"; // Added Filter import
+import { LoadingAnimation, Notification } from "../../components/CommonComponents";
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
-import { FEED_BRANDS, FEED_UNITS } from "../../constants";
-import recordsIcon from "../../images/records.svg";
+import { FEED_BRANDS } from "../../constants";
 
-const API_URL = "http://chicktrack.runasp.net/api/SaleRecord";
+const API_URL = "http://chicktrack.runasp.net/api/TotalSales";
 
-const SalesRecordPage = () => {
-  const [salesRecords, setSalesRecords] = useState([]);
+const TotalSalesPage = () => {
+  const [totalSales, setTotalSales] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
 
-  const fetchSalesRecords = async (queryString = "") => {
+  const fetchTotalSales = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}${queryString ? `?${queryString}` : ""}`);
+      const response = await fetch(API_URL);
       const data = await response.json();
-      setSalesRecords(data.content || []);
+      setTotalSales(data.content || []);
     } catch (error) {
-      console.error("Error fetching sales records:", error);
+      console.error("Error fetching total sales:", error);
     } finally {
       setLoading(false);
     }
@@ -31,17 +30,17 @@ const SalesRecordPage = () => {
     setLoading(true);
     setNotification(null);
     try {
-      const response = await fetch(`http://chicktrack.runasp.net/api/SaleRecord?id=${deleteId}`, {
+      const response = await fetch(`${API_URL}?id=${deleteId}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
-        setNotification({ type: "success", message: "Sales record deleted successfully!" });
+        setNotification({ type: "success", message: "Total sales record deleted successfully!" });
         setTimeout(() => {
           window.location.reload();
         }, 2000);
       } else {
-        setNotification({ type: "error", message: "Failed to delete sales record. Please try again." });
+        setNotification({ type: "error", message: "Failed to delete total sales record. Please try again." });
       }
     } catch (error) {
       setNotification({ type: "error", message: "An error occurred. Please try again." });
@@ -52,19 +51,16 @@ const SalesRecordPage = () => {
   };
 
   useEffect(() => {
-    fetchSalesRecords();
+    fetchTotalSales();
   }, []);
 
   const calculateTotalAmount = () => {
-    return salesRecords.reduce((total, record) => total + record.price * record.quantity, 0);
+    return totalSales.reduce((total, record) => total + record.amount, 0);
   };
 
-  const filterFields = [
-    { name: "feedBrandName", label: "Brand", type: "dropdown", options: FEED_BRANDS },
-    { name: "unit", label: "Unit", type: "dropdown", options: FEED_UNITS },
-    { name: "buyerName", label: "Buyer", placeholder: "Enter buyer name" },
-    { name: "date", label: "Date", type: "date" },
-  ];
+  const calculateTotalProfit = () => {
+    return totalSales.reduce((total, record) => total + record.profit, 0);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -80,14 +76,14 @@ const SalesRecordPage = () => {
               <FiMenu size={24} />
             </button>
             {/* Title */}
-            <h1 className="text-xl font-bold text-gray-800">Sales Record</h1>
+            <h1 className="text-xl font-bold text-gray-800">Total Sales</h1>
           </div>
         </div>
       </header>
 
-      {/* Sales Record Section */}
+      {/* Total Sales Section */}
       <section className="container mx-auto px-4 py-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">Sales Record</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">Total Sales</h2>
 
         {/* Notification */}
         {notification && <Notification notification={notification} />}
@@ -115,39 +111,32 @@ const SalesRecordPage = () => {
           </div>
         )}
 
-        {/* Filter Component */}
-        <Filter fields={filterFields} onFilter={fetchSalesRecords} />
-
-        {/* Sales Table */}
+        {/* Total Sales Table */}
         <div className="overflow-x-auto bg-white shadow-md rounded-lg">
           <table className="min-w-full text-sm text-left text-gray-500">
             <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
               <tr>
                 <th className="px-4 py-2">Brands</th>
-                <th className="px-4 py-2">Unit</th>
-                <th className="px-4 py-2">Quantity</th>
+                <th className="px-4 py-2">Bags Sold</th>
                 <th className="px-4 py-2">Amount</th>
-                <th className="px-4 py-2">Buyer</th>
-                <th className="px-4 py-2">Date</th>
+                <th className="px-4 py-2">Profit</th>
                 <th className="px-4 py-2">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td className="px-4 py-2 text-center" colSpan="7">
+                  <td className="px-4 py-2 text-center" colSpan="5">
                     <LoadingAnimation />
                   </td>
                 </tr>
               ) : (
-                salesRecords.map((record) => (
+                totalSales.map((record) => (
                   <tr key={record.id} className="border-b border-gray-400">
                     <td className="px-4 py-2">{record.feedBrandName || "N/A"}</td>
-                    <td className="px-4 py-2">{record.feedSalesUnit?.unitName || "N/A"}</td>
-                    <td className="px-4 py-2">{record.quantity}</td>
-                    <td className="px-4 py-2">{record.price.toLocaleString()}</td>
-                    <td className="px-4 py-2">{record.buyerName}</td>
-                    <td className="px-4 py-2">{record.date}</td>
+                    <td className="px-4 py-2">{record.bagsSold}</td>
+                    <td className="px-4 py-2">₦{record.amount.toLocaleString()}</td>
+                    <td className="px-4 py-2">₦{record.profit.toLocaleString()}</td>
                     <td className="px-4 py-2">
                       <button
                         className="text-red-600 hover:text-red-800"
@@ -163,30 +152,19 @@ const SalesRecordPage = () => {
             {!loading && (
               <tfoot>
                 <tr className="bg-gray-200 font-bold border-t border-gray-400">
-                  <td className="px-4 py-2" colSpan="4">Total</td>
-                  <td className="px-4 py-2" colSpan="3">
-                    ₦{calculateTotalAmount().toLocaleString()}
-                  </td>
+                  <td className="px-4 py-2">Total</td>
+                  <td className="px-4 py-2"></td>
+                  <td className="px-4 py-2">₦{calculateTotalAmount().toLocaleString()}</td>
+                  <td className="px-4 py-2">₦{calculateTotalProfit().toLocaleString()}</td>
+                  <td className="px-4 py-2"></td>
                 </tr>
               </tfoot>
             )}
           </table>
         </div>
-
-        {/* Record Sales Button */}
-        {!loading && (
-          <div className="flex justify-center mt-6">
-            <button
-              className="bg-blue-800 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-600"
-              onClick={() => window.location.href = "/recordsales"}
-            >
-              Record sales <img src={recordsIcon} alt="Record Sales" className="inline-block ml-2 w-5 h-5" />
-            </button>
-          </div>
-        )}
       </section>
     </div>
   );
 };
 
-export default SalesRecordPage;
+export default TotalSalesPage;

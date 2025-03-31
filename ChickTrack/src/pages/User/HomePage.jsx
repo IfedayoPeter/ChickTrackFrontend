@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FiSearch, FiMenu } from "react-icons/fi";
 import { FaEgg, FaKiwiBird, FaPills, FaSeedling } from "react-icons/fa";
 import { Sidebar } from "../../components/CommonComponents";
+import recordsIcon from "../../images/records1.svg";
 
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,7 +18,7 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -35,7 +36,7 @@ const HomePage = () => {
 
           {/* Login */}
           <button
-            className="px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-100"
+            className="px-4 py-2 border border-blue-600 text-blue-600 rounded-md hover:bg-indigo-600 hover:text-white hover:bg-indigo-500"
             onClick={() => navigate("/login")}
           >
             Login
@@ -68,7 +69,7 @@ const HomePage = () => {
             {categories.map((category, index) => (
               <div
                 key={index}
-                className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col items-center"
+                className="bg-indigo-50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col items-center"
               >
                 <div className="mb-2">{category.icon}</div>
                 <h3 className="font-medium text-gray-800">{category.name}</h3>
@@ -85,10 +86,11 @@ const HomePage = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button
-              className="bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700"
+              className="bg-white text-blue-800 border-2 border-indigo-500 px-6 py-3 rounded-xl font-medium
+               hover:bg-indigo-600 hover:text-white transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 "
               onClick={() => navigate("/recordsales")}
             >
-              Record sales <span className="ml-2">📋</span>
+              Record sales <img src={recordsIcon} alt="Record Sales" className="inline-block ml-2 w-5 h-5" />
             </button>
           </div>
         </div>

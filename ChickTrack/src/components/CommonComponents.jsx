@@ -62,33 +62,69 @@ export const Filter = ({ fields, onFilter }) => {
   };
 
   const handleApplyFilter = () => {
-    const queryString = Object.entries(filters)
+    const filterString = Object.entries(filters)
       .filter(([_, value]) => value) // Exclude empty values
       .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
       .join("&");
+    const queryString = filterString ? `filter=${filterString}` : "";
     onFilter(queryString);
   };
 
   return (
-    <div className="flex flex-wrap gap-4 mb-4">
+    <div className="flex flex-wrap sm:flex-nowrap gap-4 mb-4">
       {fields.map((field) => (
-        <div key={field.name} className="flex flex-col">
+        <div key={field.name} className="flex flex-col w-32 sm:w-auto">
           <label className="text-sm font-medium text-gray-700">{field.label}</label>
-          <input
-            type="text"
-            name={field.name}
-            placeholder={field.placeholder || ""}
-            onChange={handleChange}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          {field.type === "dropdown" ? (
+            <select
+              name={field.name}
+              onChange={handleChange}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select {field.label}</option>
+              {field.options.map((option) => (
+                <option key={option.value} value={option.label}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          ) : field.type === "date" ? (
+            <input
+              type="date"
+              name={field.name}
+              onChange={handleChange}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          ) : (
+            <input
+              type="text"
+              name={field.name}
+              placeholder={field.placeholder || ""}
+              onChange={handleChange}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          )}
         </div>
       ))}
-      <button
-        onClick={handleApplyFilter}
-        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-      >
-        Apply Filter
-      </button>
+      <div className="w-full sm:w-auto flex justify-center sm:justify-start">
+        <button
+          onClick={handleApplyFilter}
+          className="h-15 mt-4 bg-blue-800 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-600"
+        >
+          Apply Filter
+        </button>
+      </div>
     </div>
+  );
+};
+
+export const RecordSalesButton = ({ onClick }) => {
+  return (
+    <button
+      className="bg-white text-blue-800 border-2 border-blue-800 px-6 py-3 rounded-xl font-medium hover:bg-indigo-600 hover:text-white transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500"
+      onClick={onClick}
+    >
+      Record sales <img src={require("../../images/records1.svg")} alt="Record Sales" className="inline-block ml-2 w-5 h-5" />
+    </button>
   );
 };

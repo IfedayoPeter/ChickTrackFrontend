@@ -1,29 +1,44 @@
 import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../components/AdminSidebar";
-import { LoadingAnimation, Notification, Filter } from "../../components/CommonComponents"; // Added Filter import
+import { LoadingAnimation, Notification } from "../../components/CommonComponents";
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
-import { FEED_BRANDS, FEED_UNITS } from "../../constants";
-import recordsIcon from "../../images/records.svg";
+import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://chicktrack.runasp.net/api/SaleRecord";
+const API_URL = "http://chicktrack.runasp.net/api/FeedLog?page=1&pageSize=100";
 
-const SalesRecordPage = () => {
-  const [salesRecords, setSalesRecords] = useState([]);
+const FeedLogPage = () => {
+  const [feedLogs, setFeedLogs] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+  const [totalSales, setTotalSales] = useState(0);
+  const [totalProfit, setTotalProfit] = useState(0);
+  const navigate = useNavigate();
 
-  const fetchSalesRecords = async (queryString = "") => {
+  const fetchFeedLogs = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}${queryString ? `?${queryString}` : ""}`);
+      const response = await fetch(API_URL);
       const data = await response.json();
-      setSalesRecords(data.content || []);
+      setFeedLogs(data.content || []);
     } catch (error) {
-      console.error("Error fetching sales records:", error);
+      console.error("Error fetching feed logs:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTotals = async () => {
+    try {
+      const response = await fetch("http://chicktrack.runasp.net/api/TotalSales");
+      const data = await response.json();
+      const sales = data.content?.reduce((total, record) => total + record.amount, 0) || 0;
+      const profit = data.content?.reduce((total, record) => total + record.profit, 0) || 0;
+      setTotalSales(sales);
+      setTotalProfit(profit);
+    } catch (error) {
+      console.error("Error fetching totals:", error);
     }
   };
 
@@ -31,17 +46,17 @@ const SalesRecordPage = () => {
     setLoading(true);
     setNotification(null);
     try {
-      const response = await fetch(`http://chicktrack.runasp.net/api/SaleRecord?id=${deleteId}`, {
+      const response = await fetch(`http://chicktrack.runasp.net/api/FeedLog?id=${deleteId}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
-        setNotification({ type: "success", message: "Sales record deleted successfully!" });
+        setNotification({ type: "success", message: "Feed log deleted successfully!" });
         setTimeout(() => {
           window.location.reload();
         }, 2000);
       } else {
-        setNotification({ type: "error", message: "Failed to delete sales record. Please try again." });
+        setNotification({ type: "error", message: "Failed to delete feed log. Please try again." });
       }
     } catch (error) {
       setNotification({ type: "error", message: "An error occurred. Please try again." });
@@ -52,19 +67,11 @@ const SalesRecordPage = () => {
   };
 
   useEffect(() => {
-    fetchSalesRecords();
+    fetchFeedLogs();
+    fetchTotals();
   }, []);
 
-  const calculateTotalAmount = () => {
-    return salesRecords.reduce((total, record) => total + record.price * record.quantity, 0);
-  };
-
-  const filterFields = [
-    { name: "feedBrandName", label: "Brand", type: "dropdown", options: FEED_BRANDS },
-    { name: "unit", label: "Unit", type: "dropdown", options: FEED_UNITS },
-    { name: "buyerName", label: "Buyer", placeholder: "Enter buyer name" },
-    { name: "date", label: "Date", type: "date" },
-  ];
+  const currentSalesBalance = totalSales - totalProfit;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -80,14 +87,14 @@ const SalesRecordPage = () => {
               <FiMenu size={24} />
             </button>
             {/* Title */}
-            <h1 className="text-xl font-bold text-gray-800">Sales Record</h1>
+            <h1 className="text-xl font-bold text-gray-800">Feed Log</h1>
           </div>
         </div>
       </header>
 
-      {/* Sales Record Section */}
+      {/* Feed Log Section */}
       <section className="container mx-auto px-4 py-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">Sales Record</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">Feeds Log Table</h2>
 
         {/* Notification */}
         {notification && <Notification notification={notification} />}
@@ -96,7 +103,7 @@ const SalesRecordPage = () => {
         {deleteId && (
           <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-              <p className="text-lg font-bold mb-4">Are you sure you want to delete this record?</p>
+              <p className="text-lg font-bold mb-4">Are you sure you want to delete this log?</p>
               <div className="flex justify-center gap-4">
                 <button
                   className="bg-green-600 text-white p-3 rounded-full hover:bg-green-700"
@@ -115,39 +122,32 @@ const SalesRecordPage = () => {
           </div>
         )}
 
-        {/* Filter Component */}
-        <Filter fields={filterFields} onFilter={fetchSalesRecords} />
-
-        {/* Sales Table */}
+        {/* Feed Log Table */}
         <div className="overflow-x-auto bg-white shadow-md rounded-lg">
           <table className="min-w-full text-sm text-left text-gray-500">
             <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
               <tr>
                 <th className="px-4 py-2">Brands</th>
-                <th className="px-4 py-2">Unit</th>
-                <th className="px-4 py-2">Quantity</th>
-                <th className="px-4 py-2">Amount</th>
-                <th className="px-4 py-2">Buyer</th>
-                <th className="px-4 py-2">Date</th>
+                <th className="px-4 py-2">Bags Bought</th>
+                <th className="px-4 py-2">Bags Sold</th>
+                <th className="px-4 py-2">Available Bags</th>
                 <th className="px-4 py-2">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td className="px-4 py-2 text-center" colSpan="7">
+                  <td className="px-4 py-2 text-center" colSpan="5">
                     <LoadingAnimation />
                   </td>
                 </tr>
               ) : (
-                salesRecords.map((record) => (
+                feedLogs.map((record) => (
                   <tr key={record.id} className="border-b border-gray-400">
                     <td className="px-4 py-2">{record.feedBrandName || "N/A"}</td>
-                    <td className="px-4 py-2">{record.feedSalesUnit?.unitName || "N/A"}</td>
-                    <td className="px-4 py-2">{record.quantity}</td>
-                    <td className="px-4 py-2">{record.price.toLocaleString()}</td>
-                    <td className="px-4 py-2">{record.buyerName}</td>
-                    <td className="px-4 py-2">{record.date}</td>
+                    <td className="px-4 py-2">{record.bagsBought}</td>
+                    <td className="px-4 py-2">{record.bagsSold}</td>
+                    <td className="px-4 py-2">{record.availableBags}</td>
                     <td className="px-4 py-2">
                       <button
                         className="text-red-600 hover:text-red-800"
@@ -160,33 +160,43 @@ const SalesRecordPage = () => {
                 ))
               )}
             </tbody>
-            {!loading && (
-              <tfoot>
-                <tr className="bg-gray-200 font-bold border-t border-gray-400">
-                  <td className="px-4 py-2" colSpan="4">Total</td>
-                  <td className="px-4 py-2" colSpan="3">
-                    ₦{calculateTotalAmount().toLocaleString()}
-                  </td>
-                </tr>
-              </tfoot>
-            )}
           </table>
         </div>
 
-        {/* Record Sales Button */}
-        {!loading && (
-          <div className="flex justify-center mt-6">
-            <button
-              className="bg-blue-800 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-600"
-              onClick={() => window.location.href = "/recordsales"}
-            >
-              Record sales <img src={recordsIcon} alt="Record Sales" className="inline-block ml-2 w-5 h-5" />
-            </button>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          <div
+            className="bg-white shadow-md rounded-lg p-4 text-center cursor-pointer"
+            onClick={() => navigate("/totalSales")}
+          >
+            <p className="text-sm text-gray-500">Total Sales</p>
+            <p className="text-lg font-bold text-gray-800">₦{totalSales.toLocaleString()}</p>
           </div>
-        )}
+          <div
+            className="bg-white shadow-md rounded-lg p-4 text-center cursor-pointer"
+            onClick={() => navigate("/totalSales")}
+          >
+            <p className="text-sm text-gray-500">Current Sales Balance</p>
+            <p className="text-lg font-bold text-gray-800">₦{currentSalesBalance.toLocaleString()}</p>
+          </div>
+          <div
+            className="bg-white shadow-md rounded-lg p-4 text-center cursor-pointer"
+            onClick={() => navigate("/totalSales")}
+          >
+            <p className="text-sm text-gray-500">Profit</p>
+            <p className="text-lg font-bold text-gray-800">₦{totalProfit.toLocaleString()}</p>
+          </div>
+          <div
+            className="bg-white shadow-md rounded-lg p-4 text-center cursor-pointer"
+            onClick={() => navigate("/feedInventory")}
+          >
+            <p className="text-sm text-gray-500">Feed Inventory</p>
+            <p className="text-lg font-bold text-gray-800">₦{(totalSales - totalProfit).toLocaleString()}</p>
+          </div>
+        </div>
       </section>
     </div>
   );
 };
 
-export default SalesRecordPage;
+export default FeedLogPage;
