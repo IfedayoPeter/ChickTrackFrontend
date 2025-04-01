@@ -31,7 +31,7 @@ const SalesRecordPage = () => {
     setLoading(true);
     setNotification(null);
     try {
-      const response = await fetch(`http://chicktrack.runasp.net/api/SaleRecord?id=${deleteId}`, {
+      const response = await fetch(`https://chicktrack.runasp.net/api/SaleRecord?id=${deleteId}`, {
         method: "DELETE",
       });
 

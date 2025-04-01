@@ -60,7 +60,7 @@ const FeedInventoryPage = () => {
     setSaving(true);
     setNotification(null);
     try {
-      const response = await fetch("http://chicktrack.runasp.net/api/FeedInventory", {
+      const response = await fetch("https://chicktrack.runasp.net/api/FeedInventory", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +87,7 @@ const FeedInventoryPage = () => {
     setSaving(true);
     setNotification(null);
     try {
-      const response = await fetch(`http://chicktrack.runasp.net/api/FeedInventory?id=${deleteId}`, {
+      const response = await fetch(`https://chicktrack.runasp.net/api/FeedInventory?id=${deleteId}`, {
         method: "DELETE",
       });
 

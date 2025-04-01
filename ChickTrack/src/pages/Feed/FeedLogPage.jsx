@@ -32,7 +32,7 @@ const FeedLogPage = () => {
 
   const fetchTotals = async () => {
     try {
-      const response = await fetch("http://chicktrack.runasp.net/api/TotalSales");
+      const response = await fetch("https://chicktrack.runasp.net/api/TotalSales");
       const data = await response.json();
       const sales = data.content?.reduce((total, record) => total + record.amount, 0) || 0;
       const profit = calculateTotalProfit(data.content || []); // Use calculateTotalProfit
@@ -47,7 +47,7 @@ const FeedLogPage = () => {
     setLoading(true);
     setNotification(null);
     try {
-      const response = await fetch(`http://chicktrack.runasp.net/api/FeedLog?id=${deleteId}`, {
+      const response = await fetch(`https://chicktrack.runasp.net/api/FeedLog?id=${deleteId}`, {
         method: "DELETE",
       });
 
