@@ -3,8 +3,10 @@ import AdminSidebar from "../../components/AdminSidebar";
 import { LoadingAnimation, Notification } from "../../components/CommonComponents";
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { FEED_BRANDS } from "../../constants";
+import { calculateTotalProfit } from "./TotalSalesPage"; // Import calculateTotalProfit
 
 const API_URL = "https://chicktrack.runasp.net/api/FeedInventory?page=1&pageSize=100"; // Updated to HTTPS
+const TOTAL_SALES_API_URL = "https://chicktrack.runasp.net/api/TotalSales"; // Added TotalSales API URL
 
 const FeedInventoryPage = () => {
   const [feedInventory, setFeedInventory] = useState([]);
@@ -14,7 +16,7 @@ const FeedInventoryPage = () => {
   const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
-  const [totalProfit, setTotalProfit] = useState(0);
+  const [totalProfit, setTotalProfit] = useState(0); // Profit fetched from TotalSales API
 
   const fetchFeedInventory = async () => {
     setLoading(true);
@@ -28,6 +30,21 @@ const FeedInventoryPage = () => {
       setLoading(false);
     }
   };
+
+  const fetchTotalProfit = async () => {
+    try {
+      const response = await fetch(TOTAL_SALES_API_URL);
+      const data = await response.json();
+      setTotalProfit(calculateTotalProfit(data.content || [])); // Use calculateTotalProfit
+    } catch (error) {
+      console.error("Error fetching total profit:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeedInventory();
+    fetchTotalProfit(); // Fetch profit from TotalSales API
+  }, []);
 
   const handleAddRow = () => {
     setNewRow({
@@ -97,21 +114,6 @@ const FeedInventoryPage = () => {
       [name]: name === "feedBrand" ? parseInt(value) : value,
     }));
   };
-
-  useEffect(() => {
-    fetchFeedInventory();
-    const fetchTotalProfit = async () => {
-      try {
-        const response = await fetch("http://chicktrack.runasp.net/api/TotalSales");
-        const data = await response.json();
-        const profit = data.content?.reduce((total, record) => total + record.profit, 0) || 0;
-        setTotalProfit(profit);
-      } catch (error) {
-        console.error("Error fetching total profit:", error);
-      }
-    };
-    fetchTotalProfit();
-  }, []);
 
   const calculateTotalBags = () => {
     return feedInventory.reduce((total, record) => total + record.bagsBought, 0);

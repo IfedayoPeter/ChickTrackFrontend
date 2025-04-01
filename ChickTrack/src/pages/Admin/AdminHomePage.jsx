@@ -1,20 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminSidebar from "../../components/AdminSidebar";
 import { FiMenu, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { FaKiwiBird, FaEgg, FaMoneyBillWave, FaSeedling } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { calculateTotalProfit } from "../Feed/TotalSalesPage"; // Import calculateTotalProfit
 
 const AdminHomePage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [feedAccordionOpen, setFeedAccordionOpen] = useState(false);
+  const [feedSalesProfit, setFeedSalesProfit] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchFeedSalesProfit = async () => {
+      try {
+        const response = await fetch("https://chicktrack.runasp.net/api/TotalSales");
+        const data = await response.json();
+        setFeedSalesProfit(calculateTotalProfit(data.content || [])); // Use calculateTotalProfit
+      } catch (error) {
+        console.error("Error fetching feed sales profit:", error);
+      }
+    };
+
+    fetchFeedSalesProfit();
+  }, []);
 
   const overviewCards = [
     { icon: <FaKiwiBird className="text-2xl text-blue-600" />, label: "Available birds", value: "200" },
     { icon: <FaEgg className="text-2xl text-blue-600" />, label: "Available eggs", value: "200" },
     { icon: <FaMoneyBillWave className="text-2xl text-blue-600" />, label: "Total Investment", value: "#200,000,000" },
-    { icon: <FaSeedling className="text-2xl text-blue-600" />, label: "Feed sales profit", value: "#200,000,000" },
+    { icon: <FaSeedling className="text-2xl text-blue-600" />, label: "Feed sales profit", value: `₦${feedSalesProfit.toLocaleString()}` }, // Updated to use feedSalesProfit
   ];
 
   const feedPages = [

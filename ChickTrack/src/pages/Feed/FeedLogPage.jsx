@@ -3,6 +3,7 @@ import AdminSidebar from "../../components/AdminSidebar";
 import { LoadingAnimation, Notification } from "../../components/CommonComponents";
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { calculateTotalProfit } from "./TotalSalesPage"; // Import calculateTotalProfit
 
 const API_URL = "https://chicktrack.runasp.net/api/FeedLog?page=1&pageSize=100";
 
@@ -34,7 +35,7 @@ const FeedLogPage = () => {
       const response = await fetch("http://chicktrack.runasp.net/api/TotalSales");
       const data = await response.json();
       const sales = data.content?.reduce((total, record) => total + record.amount, 0) || 0;
-      const profit = data.content?.reduce((total, record) => total + record.profit, 0) || 0;
+      const profit = calculateTotalProfit(data.content || []); // Use calculateTotalProfit
       setTotalSales(sales);
       setTotalProfit(profit);
     } catch (error) {

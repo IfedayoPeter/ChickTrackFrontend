@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../components/AdminSidebar";
 import { LoadingAnimation, Notification } from "../../components/CommonComponents";
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
-import { FEED_BRANDS } from "../../constants";
 
 const API_URL = "https://chicktrack.runasp.net/api/TotalSales"; // Updated to HTTPS
+
+export const calculateTotalProfit = (totalSales) => {
+  return totalSales.reduce((total, record) => total + record.profit, 0);
+};
 
 const TotalSalesPage = () => {
   const [totalSales, setTotalSales] = useState([]);
@@ -56,10 +59,6 @@ const TotalSalesPage = () => {
 
   const calculateTotalAmount = () => {
     return totalSales.reduce((total, record) => total + record.amount, 0);
-  };
-
-  const calculateTotalProfit = () => {
-    return totalSales.reduce((total, record) => total + record.profit, 0);
   };
 
   return (
@@ -155,7 +154,7 @@ const TotalSalesPage = () => {
                   <td className="px-4 py-2">Total</td>
                   <td className="px-4 py-2"></td>
                   <td className="px-4 py-2">₦{calculateTotalAmount().toLocaleString()}</td>
-                  <td className="px-4 py-2">₦{calculateTotalProfit().toLocaleString()}</td>
+                  <td className="px-4 py-2">₦{calculateTotalProfit(totalSales).toLocaleString()}</td>
                   <td className="px-4 py-2"></td>
                 </tr>
               </tfoot>
