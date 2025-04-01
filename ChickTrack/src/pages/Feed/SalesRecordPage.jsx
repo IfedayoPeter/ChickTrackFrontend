@@ -5,7 +5,7 @@ import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { FEED_BRANDS, FEED_UNITS } from "../../constants";
 import recordsIcon from "../../images/records.svg";
 
-const API_URL = "http://chicktrack.runasp.net/api/SaleRecord";
+const API_URL = "https://chicktrack.runasp.net/api/SaleRecord"; // Updated to HTTPS
 
 const SalesRecordPage = () => {
   const [salesRecords, setSalesRecords] = useState([]);

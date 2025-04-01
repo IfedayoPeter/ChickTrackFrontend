@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { SALES_TYPES, FEED_BRANDS, FEED_UNITS } from "../../constants";
 import { LoadingAnimation, Notification } from "../../components/CommonComponents";
 
-const API_URL = "http://chicktrack.runasp.net/api/SaleRecord";
+const API_URL = "https://chicktrack.runasp.net/api/SaleRecord"; // Updated to HTTPS
 
 const RecordSalePage = () => {
   const [formData, setFormData] = useState({

@@ -4,7 +4,7 @@ import { LoadingAnimation, Notification } from "../../components/CommonComponent
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { FEED_BRANDS } from "../../constants";
 
-const API_URL = "http://chicktrack.runasp.net/api/TotalSales";
+const API_URL = "https://chicktrack.runasp.net/api/TotalSales"; // Updated to HTTPS
 
 const TotalSalesPage = () => {
   const [totalSales, setTotalSales] = useState([]);

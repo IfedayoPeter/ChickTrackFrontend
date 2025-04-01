@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { LoadingAnimation, Notification } from '../../components/CommonComponents';
 
 const LoginPage = () => {
@@ -9,6 +10,7 @@ const LoginPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleChange = (e) => {
     setCredentials({
@@ -24,14 +26,18 @@ const LoginPage = () => {
 
     try {
       const response = await axios.post(
-        'http://chicktrack.runasp.net/api/BaseUser/login',
+        'https://chicktrack.runasp.net/api/BaseUser/login',
         credentials
       );
 
       // Handle successful login
       console.log('Login successful:', response.data);
       setNotification({ type: 'success', message: 'Login successful!' });
-      // Example: localStorage.setItem('token', response.data.token);
+
+      // Redirect to admin homepage
+      setTimeout(() => {
+        navigate('/admin/home');
+      }, 1000); // Add a slight delay for the notification to display
     } catch (err) {
       setNotification({
         type: 'error',
