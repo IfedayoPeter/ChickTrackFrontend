@@ -6,6 +6,7 @@ const API_URL = "https://chicktrack.runasp.net/api/SaleRecord"; // Updated to HT
 
 const RecordSalePage = () => {
   const [formData, setFormData] = useState({
+    code: "",
     salesType: "1", // Default to Feed
     feedBrand: "",
     feedSalesUnitId: "",
