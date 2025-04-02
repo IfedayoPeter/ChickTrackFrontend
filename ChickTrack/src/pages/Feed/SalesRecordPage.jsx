@@ -56,7 +56,7 @@ const SalesRecordPage = () => {
   }, []);
 
   const calculateTotalAmount = () => {
-    return salesRecords.reduce((total, record) => total + record.price * record.quantity, 0);
+    return salesRecords.reduce((total, record) => total + record.price, 0);
   };
 
   const filterFields = [
@@ -163,10 +163,9 @@ const SalesRecordPage = () => {
             {!loading && (
               <tfoot>
                 <tr className="bg-gray-200 font-bold border-t border-gray-400">
-                  <td className="px-4 py-2" colSpan="4">Total</td>
-                  <td className="px-4 py-2" colSpan="3">
-                    ₦{calculateTotalAmount().toLocaleString()}
-                  </td>
+                  <td className="px-4 py-2" colSpan="3">Total</td> {/* Adjust colspan */}
+                  <td className="px-4 py-2 text-left">₦{calculateTotalAmount().toLocaleString()}</td> {/* Align under Amount */}
+                  <td className="px-4 py-2" colSpan="3"></td> {/* Empty columns */}
                 </tr>
               </tfoot>
             )}
