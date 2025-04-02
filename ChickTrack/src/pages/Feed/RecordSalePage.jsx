@@ -80,9 +80,9 @@ const RecordSalePage = () => {
         {/* Close Icon */}
         <button
           onClick={() => navigate(-1)} // Navigate back to the previous page
-          className="absolute top-4 left-4 text-gray-500 hover:text-gray-700"
+          className="absolute top-4 left-4 text-red-500 hover:text-red-700" // Make the button red
         >
-          ✖
+          ❌
         </button>
 
         {/* Loading Animation */}
@@ -93,7 +93,7 @@ const RecordSalePage = () => {
 
         {/* Form */}
         {!loading && (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 pt-10"> {/* Add padding to bring the form down */}
             {/* Sales Type and Date */}
             <div className="flex flex-col md:flex-row md:space-x-4">
               <div className="flex-1">
