@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { SALES_TYPES, FEED_BRANDS, FEED_UNITS } from "../../constants";
 import { LoadingAnimation, Notification } from "../../components/CommonComponents";
 
 const API_URL = "https://chicktrack.runasp.net/api/SaleRecord"; // Updated to HTTPS
 
 const RecordSalePage = () => {
+  const navigate = useNavigate(); // Initialize navigate
   const [formData, setFormData] = useState({
     code: "",
     salesType: "1", // Default to Feed
@@ -48,6 +50,7 @@ const RecordSalePage = () => {
       if (response.ok) {
         setNotification({ type: "success", message: "Sale record added successfully!" });
         setFormData({
+          code: "", // Reset the code field
           salesType: "1",
           quantity: "",
           price: "",
@@ -73,7 +76,15 @@ const RecordSalePage = () => {
 
   return (
     <div className="h-screen w-screen bg-gray-100">
-      <div className="bg-white h-full w-full p-6">
+      <div className="bg-white h-full w-full p-6 relative">
+        {/* Close Icon */}
+        <button
+          onClick={() => navigate(-1)} // Navigate back to the previous page
+          className="absolute top-4 left-4 text-gray-500 hover:text-gray-700"
+        >
+          ✖
+        </button>
+
         {/* Loading Animation */}
         {loading && <LoadingAnimation />}
 
