@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import searchIcon from "../images/search.svg";
+import clearIcon from "../images/clear.svg";
 
 export const LoadingAnimation = () => (
   <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -51,69 +53,37 @@ export const Sidebar = ({ isOpen, onClose }) => {
   );
 };
 
-export const Filter = ({ fields, onFilter }) => {
-  const [filters, setFilters] = useState({});
+export const Search = ({ onSearch }) => {
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const handleChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleApplyFilter = () => {
-    const filterString = Object.entries(filters)
-      .filter(([_, value]) => value) // Exclude empty values
-      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-      .join("&");
-    const queryString = filterString ? `filter=${filterString}` : "";
-    onFilter(queryString);
+  const handleSearch = () => {
+    const queryString = searchTerm ? `search=${encodeURIComponent(searchTerm)}` : "";
+    onSearch(queryString);
   };
 
   return (
-    <div className="flex flex-wrap sm:flex-nowrap gap-4 mb-4">
-      {fields.map((field) => (
-        <div key={field.name} className="flex flex-col w-32 sm:w-auto">
-          <label className="text-sm font-medium text-gray-700">{field.label}</label>
-          {field.type === "dropdown" ? (
-            <select
-              name={field.name}
-              onChange={handleChange}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select {field.label}</option>
-              {field.options.map((option) => (
-                <option key={option.value} value={option.label}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          ) : field.type === "date" ? (
-            <input
-              type="date"
-              name={field.name}
-              onChange={handleChange}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          ) : (
-            <input
-              type="text"
-              name={field.name}
-              placeholder={field.placeholder || ""}
-              onChange={handleChange}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          )}
-        </div>
-      ))}
-      <div className="w-full sm:w-auto flex justify-center sm:justify-start">
+    <div className="relative mb-4">
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Search"
+        className="w-44 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+      />
+      <button
+        onClick={handleSearch}
+        className="absolute top-1/2 right-10 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+      >
+        <img src={searchIcon} alt="Search" className="w-5 h-5 ml-10" />
+      </button>
+      {searchTerm && (
         <button
-          onClick={handleApplyFilter}
-          className="h-15 mt-4 bg-blue-800 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-600"
+          onClick={() => setSearchTerm("")}
+          className="absolute top-1/2 right-2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
         >
-          Apply Filter
+          <img src={clearIcon} alt="Clear" className="w-5 h-5" />
         </button>
-      </div>
+      )}
     </div>
   );
 };
@@ -128,3 +98,4 @@ export const RecordSalesButton = ({ onClick }) => {
     </button>
   );
 };
+

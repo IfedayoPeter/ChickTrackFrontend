@@ -3,7 +3,7 @@ import AdminSidebar from "../../components/AdminSidebar";
 import { LoadingAnimation, Notification } from "../../components/CommonComponents";
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 
-const API_URL = "https://chicktrack.runasp.net/api/TotalSales"; // Updated to HTTPS
+const API_URL = "https://chicktrack.runasp.net/api/TotalSales"; 
 
 export const calculateTotalProfit = (totalSales) => {
   return totalSales.reduce((total, record) => total + record.profit, 0);

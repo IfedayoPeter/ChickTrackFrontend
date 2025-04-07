@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../components/AdminSidebar";
-import { LoadingAnimation, Notification, Filter } from "../../components/CommonComponents"; // Added Filter import
+import { LoadingAnimation, Notification, Search } from "../../components/CommonComponents"; 
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { FEED_BRANDS, FEED_UNITS } from "../../constants";
 import recordsIcon from "../../images/records.svg";
+import { sortByDate } from "../../utils/sortUtils";
+import ascendingIcon from "../../images/sort-ascending.svg";
+import descendingIcon from "../../images/sort-descending.svg";
 
-const API_URL = "https://chicktrack.runasp.net/api/SaleRecord"; // Updated to HTTPS
+const API_URL = "https://chicktrack.runasp.net/api/SaleRecord"; 
 
 const SalesRecordPage = () => {
   const [salesRecords, setSalesRecords] = useState([]);
@@ -57,6 +60,11 @@ const SalesRecordPage = () => {
 
   const calculateTotalAmount = () => {
     return salesRecords.reduce((total, record) => total + record.price, 0);
+  };
+
+  const handleSort = (order) => {
+    const sortedRecords = sortByDate([...salesRecords], order);
+    setSalesRecords(sortedRecords);
   };
 
   const filterFields = [
@@ -115,8 +123,24 @@ const SalesRecordPage = () => {
           </div>
         )}
 
-        {/* Filter Component */}
-        <Filter fields={filterFields} onFilter={fetchSalesRecords} />
+        {/* Sort Buttons */}
+        <div className="flex justify-between items-center mb-4">
+          <Search onSearch={fetchSalesRecords} />
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => handleSort("asc")}
+              className="flex items-center gap-2 bg- text-gray-800 px-4 py-2 rounded-l-md hover:bg-gray-300"
+            >
+              <img src={ascendingIcon} alt="Ascending" className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() => handleSort("desc")}
+              className="flex items-center gap-2 bg-transparent text-gray-800 px-4 py-2 rounded-r-md hover:bg-gray-300"
+            >
+              <img src={descendingIcon} alt="Descending" className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
 
         {/* Sales Table */}
         <div className="overflow-x-auto bg-white shadow-md rounded-lg">
