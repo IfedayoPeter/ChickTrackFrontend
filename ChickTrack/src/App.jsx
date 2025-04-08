@@ -8,6 +8,7 @@ import FeedInventoryPage from "./pages/Feed/FeedInventoryPage";
 import TotalSalesPage from "./pages/Feed/TotalSalesPage";
 import FeedLogPage from "./pages/Feed/FeedLogPage";
 import AdminHomePage from "./pages/Admin/AdminHomePage";
+import InvestmentPage from "./pages/Financials/InvestmentPage";
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/feedInventory" element={<FeedInventoryPage />} />
         <Route path="/totalSales" element={<TotalSalesPage />} />
         <Route path="/feedLog" element={<FeedLogPage />} />
+        <Route path="/investment" element={<InvestmentPage />} />
         <Route path="/admin/home" element={<AdminHomePage />} />
       </Routes>
     </Router>
