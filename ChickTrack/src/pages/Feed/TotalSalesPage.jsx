@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../components/AdminSidebar";
 import { LoadingAnimation, Notification } from "../../components/CommonComponents";
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 const API_URL = "https://chicktrack.runasp.net/api/TotalSales"; 
 
@@ -62,26 +64,11 @@ const TotalSalesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Header />
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            {/* Hamburger Menu */}
-            <button className="text-gray-500" onClick={() => setSidebarOpen(true)}>
-              <FiMenu size={24} />
-            </button>
-            {/* Title */}
-            <h1 className="text-xl font-bold text-gray-800">Total Sales</h1>
-          </div>
-        </div>
-      </header>
-
-      {/* Total Sales Section */}
-      <section className="container mx-auto px-4 py-6">
+      <main className="flex-grow container mx-auto px-4 py-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">Total Sales</h2>
 
         {/* Notification */}
@@ -161,7 +148,8 @@ const TotalSalesPage = () => {
             )}
           </table>
         </div>
-      </section>
+      </main>
+      <Footer />
     </div>
   );
 };

@@ -4,6 +4,8 @@ import { LoadingAnimation, Notification } from "../../components/CommonComponent
 import { FiTrash2, FiPlus, FiCheck, FiX } from "react-icons/fi";
 import AdminSidebar from "../../components/AdminSidebar";
 import edit from "../../images/edit.svg";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 const API_INVESTMENT = "https://chicktrack.runasp.net/api/Investment";
 const API_EXPENSES = "https://chicktrack.runasp.net/api/Expenses";
@@ -268,437 +270,425 @@ const InvestmentPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Header />
       <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <button
-            className="text-gray-800 text-2xl"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            ☰
-          </button>
-          <h1 className="text-xl font-bold text-gray-800">Investment</h1>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <section className="container mx-auto px-4 py-6">
+      <main className="flex-grow container mx-auto px-4 py-6">
         {notification && <Notification notification={notification} />}
 
         {/* Investment Table */}
-<div className="mb-8">
-  <div className="flex justify-between items-center mb-4">
-    <h2 className="text-lg font-bold text-gray-800">Investment Table</h2>
-    <button
-      onClick={handleAddInvestment}
-      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2"
-      disabled={!!editingId} // Disable add button when editing
-    >
-      <FiPlus /> Add
-    </button>
-  </div>
-  <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-    <table className="min-w-full text-sm text-left text-gray-500">
-      <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
-        <tr>
-          <th className="px-4 py-2">Date</th>
-          <th className="px-4 py-2">Investor</th>
-          <th className="px-4 py-2">Description</th>
-          <th className="px-4 py-2">Amount</th>
-          <th className="px-4 py-2">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {loading ? (
-          <tr>
-            <td colSpan="5" className="text-center py-4">
-              <LoadingAnimation />
-            </td>
-          </tr>
-        ) : (
-          <>
-            {investments.map((investment) => (
-              <tr key={investment.id} className="border-b border-gray-400">
-                {editingId === investment.id ? (
-                  <>
-                    <td className="px-4 py-2">
-                      <input
-                        type="date"
-                        value={newInvestment.date}
-                        onChange={(e) =>
-                          setNewInvestment({ ...newInvestment, date: e.target.value })
-                        }
-                        className="border border-gray-300 rounded-md px-2 py-1"
-                      />
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-gray-800">Investment Table</h2>
+            <button
+              onClick={handleAddInvestment}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2"
+              disabled={!!editingId} // Disable add button when editing
+            >
+              <FiPlus /> Add
+            </button>
+          </div>
+          <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+            <table className="min-w-full text-sm text-left text-gray-500">
+              <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
+                <tr>
+                  <th className="px-4 py-2">Date</th>
+                  <th className="px-4 py-2">Investor</th>
+                  <th className="px-4 py-2">Description</th>
+                  <th className="px-4 py-2">Amount</th>
+                  <th className="px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="text-center py-4">
+                      <LoadingAnimation />
                     </td>
-                    <td className="px-4 py-2">
-                      <select
-                        value={newInvestment.investorId}
-                        onChange={(e) =>
-                          setNewInvestment({ ...newInvestment, investorId: e.target.value })
-                        }
-                        className="border border-gray-300 rounded-md px-2 py-1"
-                      >
-                        <option value="">Select Investor</option>
-                        {users.map((user) => (
-                          <option key={user.id} value={user.id}>
-                            {user.fullName}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-4 py-2">
-                      <input
-                        type="text"
-                        value={newInvestment.description}
-                        onChange={(e) =>
-                          setNewInvestment({ ...newInvestment, description: e.target.value })
-                        }
-                        placeholder="Description"
-                        className="border border-gray-300 rounded-md px-2 py-1"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <input
-                        type="number"
-                        value={newInvestment.amount}
-                        onChange={(e) =>
-                          setNewInvestment({ ...newInvestment, amount: e.target.value })
-                        }
-                        placeholder="Amount"
-                        className="border border-gray-300 rounded-md px-2 py-1"
-                      />
-                    </td>
-                    <td className="px-4 py-2 flex gap-2">
-                      <button
-                        onClick={handleSaveInvestment}
-                        className="bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700"
-                      >
-                        <FiCheck />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditingId(null);
-                          setNewInvestment(null);
-                        }}
-                        className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
-                      >
-                        <FiX />
-                      </button>
-                    </td>
-                  </>
+                  </tr>
                 ) : (
                   <>
-                    <td className="px-4 py-2">{new Date(investment.date).toLocaleDateString()}</td>
-                    <td className="px-4 py-2">{investment.fullName}</td>
-                    <td className="px-4 py-2">{investment.description}</td>
-                    <td className="px-4 py-2">₦{investment.amount.toLocaleString()}</td>
-                    <td className="px-4 py-2 flex gap-2">
-                      <button
-                        className="text-blue-600 hover:text-blue-800"
-                        onClick={() => handleEditInvestment(investment)}
-                        disabled={!!editingId} // Disable edit button when already editing
-                      >
-                        <img src={edit} alt="Edit" className="w-5 h-5" />
-                      </button>
-                      <button
-                        className="text-red-600 hover:text-red-800"
-                        onClick={() => {
-                          setDeleteId(investment.id);
-                          setDeleteType("investment");
-                        }}
-                        disabled={!!editingId} // Disable delete button when editing
-                      >
-                        <FiTrash2 size={20} />
-                      </button>
-                    </td>
+                    {investments.map((investment) => (
+                      <tr key={investment.id} className="border-b border-gray-400">
+                        {editingId === investment.id ? (
+                          <>
+                            <td className="px-4 py-2">
+                              <input
+                                type="date"
+                                value={newInvestment.date}
+                                onChange={(e) =>
+                                  setNewInvestment({ ...newInvestment, date: e.target.value })
+                                }
+                                className="border border-gray-300 rounded-md px-2 py-1"
+                              />
+                            </td>
+                            <td className="px-4 py-2">
+                              <select
+                                value={newInvestment.investorId}
+                                onChange={(e) =>
+                                  setNewInvestment({ ...newInvestment, investorId: e.target.value })
+                                }
+                                className="border border-gray-300 rounded-md px-2 py-1"
+                              >
+                                <option value="">Select Investor</option>
+                                {users.map((user) => (
+                                  <option key={user.id} value={user.id}>
+                                    {user.fullName}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="text"
+                                value={newInvestment.description}
+                                onChange={(e) =>
+                                  setNewInvestment({ ...newInvestment, description: e.target.value })
+                                }
+                                placeholder="Description"
+                                className="border border-gray-300 rounded-md px-2 py-1"
+                              />
+                            </td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="number"
+                                value={newInvestment.amount}
+                                onChange={(e) =>
+                                  setNewInvestment({ ...newInvestment, amount: e.target.value })
+                                }
+                                placeholder="Amount"
+                                className="border border-gray-300 rounded-md px-2 py-1"
+                              />
+                            </td>
+                            <td className="px-4 py-2 flex gap-2">
+                              <button
+                                onClick={handleSaveInvestment}
+                                className="bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700"
+                              >
+                                <FiCheck />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingId(null);
+                                  setNewInvestment(null);
+                                }}
+                                className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
+                              >
+                                <FiX />
+                              </button>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="px-4 py-2">{new Date(investment.date).toLocaleDateString()}</td>
+                            <td className="px-4 py-2">{investment.fullName}</td>
+                            <td className="px-4 py-2">{investment.description}</td>
+                            <td className="px-4 py-2">₦{investment.amount.toLocaleString()}</td>
+                            <td className="px-4 py-2 flex gap-2">
+                              <button
+                                className="text-blue-600 hover:text-blue-800"
+                                onClick={() => handleEditInvestment(investment)}
+                                disabled={!!editingId} // Disable edit button when already editing
+                              >
+                                <img src={edit} alt="Edit" className="w-5 h-5" />
+                              </button>
+                              <button
+                                className="text-red-600 hover:text-red-800"
+                                onClick={() => {
+                                  setDeleteId(investment.id);
+                                  setDeleteType("investment");
+                                }}
+                                disabled={!!editingId} // Disable delete button when editing
+                              >
+                                <FiTrash2 size={20} />
+                              </button>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    ))}
+                    {/* Only show new row if not currently editing */}
+                    {newInvestment && !editingId && (
+                      <tr className="border-b border-gray-400">
+                        <td className="px-4 py-2">
+                          <input
+                            type="date"
+                            value={newInvestment.date}
+                            onChange={(e) =>
+                              setNewInvestment({ ...newInvestment, date: e.target.value })
+                            }
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          />
+                        </td>
+                        <td className="px-4 py-2">
+                          <select
+                            value={newInvestment.investorId}
+                            onChange={(e) =>
+                              setNewInvestment({ ...newInvestment, investorId: e.target.value })
+                            }
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          >
+                            <option value="">Select Investor</option>
+                            {users.map((user) => (
+                              <option key={user.id} value={user.id}>
+                                {user.fullName}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="text"
+                            value={newInvestment.description}
+                            onChange={(e) =>
+                              setNewInvestment({ ...newInvestment, description: e.target.value })
+                            }
+                            placeholder="Description"
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          />
+                        </td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="number"
+                            value={newInvestment.amount}
+                            onChange={(e) =>
+                              setNewInvestment({ ...newInvestment, amount: e.target.value })
+                            }
+                            placeholder="Amount"
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          />
+                        </td>
+                        <td className="px-4 py-2 flex gap-2">
+                          <button
+                            onClick={handleSaveInvestment}
+                            className="bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700"
+                          >
+                            <FiCheck />
+                          </button>
+                          <button
+                            onClick={() => setNewInvestment(null)}
+                            className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
+                          >
+                            <FiX />
+                          </button>
+                        </td>
+                      </tr>
+                    )}
                   </>
                 )}
-              </tr>
-            ))}
-            {/* Only show new row if not currently editing */}
-            {newInvestment && !editingId && (
-              <tr className="border-b border-gray-400">
-                <td className="px-4 py-2">
-                  <input
-                    type="date"
-                    value={newInvestment.date}
-                    onChange={(e) =>
-                      setNewInvestment({ ...newInvestment, date: e.target.value })
-                    }
-                    className="border border-gray-300 rounded-md px-2 py-1"
-                  />
-                </td>
-                <td className="px-4 py-2">
-                  <select
-                    value={newInvestment.investorId}
-                    onChange={(e) =>
-                      setNewInvestment({ ...newInvestment, investorId: e.target.value })
-                    }
-                    className="border border-gray-300 rounded-md px-2 py-1"
-                  >
-                    <option value="">Select Investor</option>
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.fullName}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-4 py-2">
-                  <input
-                    type="text"
-                    value={newInvestment.description}
-                    onChange={(e) =>
-                      setNewInvestment({ ...newInvestment, description: e.target.value })
-                    }
-                    placeholder="Description"
-                    className="border border-gray-300 rounded-md px-2 py-1"
-                  />
-                </td>
-                <td className="px-4 py-2">
-                  <input
-                    type="number"
-                    value={newInvestment.amount}
-                    onChange={(e) =>
-                      setNewInvestment({ ...newInvestment, amount: e.target.value })
-                    }
-                    placeholder="Amount"
-                    className="border border-gray-300 rounded-md px-2 py-1"
-                  />
-                </td>
-                <td className="px-4 py-2 flex gap-2">
-                  <button
-                    onClick={handleSaveInvestment}
-                    className="bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700"
-                  >
-                    <FiCheck />
-                  </button>
-                  <button
-                    onClick={() => setNewInvestment(null)}
-                    className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
-                  >
-                    <FiX />
-                  </button>
-                </td>
-              </tr>
-            )}
-          </>
-        )}
-      </tbody>
-    </table>
-  </div>
-</div>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         {/* Expenses Table */}
-<div>
-  <div className="flex justify-between items-center mb-4">
-    <h2 className="text-lg font-bold text-gray-800">Expenses Table</h2>
-    <button
-      onClick={handleAddExpense}
-      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2"
-      disabled={!!editingExpenseId} // Disable add button when editing
-    >
-      <FiPlus /> Add
-    </button>
-  </div>
-  <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-    <table className="min-w-full text-sm text-left text-gray-500">
-      <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
-        <tr>
-          <th className="px-4 py-2">Date</th>
-          <th className="px-4 py-2">Investor</th>
-          <th className="px-4 py-2">Description</th>
-          <th className="px-4 py-2">Amount</th>
-          <th className="px-4 py-2">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {loading ? (
-          <tr>
-            <td colSpan="5" className="text-center py-4">
-              <LoadingAnimation />
-            </td>
-          </tr>
-        ) : (
-          <>
-            {expenses.map((expense) => (
-              <tr key={expense.id} className="border-b border-gray-400">
-                {editingExpenseId === expense.id ? (
-                  <>
-                    <td className="px-4 py-2">
-                      <input
-                        type="date"
-                        value={newExpense.date}
-                        onChange={(e) =>
-                          setNewExpense({ ...newExpense, date: e.target.value })
-                        }
-                        className="border border-gray-300 rounded-md px-2 py-1"
-                      />
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-gray-800">Expenses Table</h2>
+            <button
+              onClick={handleAddExpense}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2"
+              disabled={!!editingExpenseId} // Disable add button when editing
+            >
+              <FiPlus /> Add
+            </button>
+          </div>
+          <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+            <table className="min-w-full text-sm text-left text-gray-500">
+              <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
+                <tr>
+                  <th className="px-4 py-2">Date</th>
+                  <th className="px-4 py-2">Investor</th>
+                  <th className="px-4 py-2">Description</th>
+                  <th className="px-4 py-2">Amount</th>
+                  <th className="px-4 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="text-center py-4">
+                      <LoadingAnimation />
                     </td>
-                    <td className="px-4 py-2">
-                      <select
-                        value={newExpense.investorId}
-                        onChange={(e) =>
-                          setNewExpense({ ...newExpense, investorId: e.target.value })
-                        }
-                        className="border border-gray-300 rounded-md px-2 py-1"
-                      >
-                        <option value="">Select Investor</option>
-                        {users.map((user) => (
-                          <option key={user.id} value={user.id}>
-                            {user.fullName}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-4 py-2">
-                      <input
-                        type="text"
-                        value={newExpense.description}
-                        onChange={(e) =>
-                          setNewExpense({ ...newExpense, description: e.target.value })
-                        }
-                        placeholder="Description"
-                        className="border border-gray-300 rounded-md px-2 py-1"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <input
-                        type="number"
-                        value={newExpense.amount}
-                        onChange={(e) =>
-                          setNewExpense({ ...newExpense, amount: e.target.value })
-                        }
-                        placeholder="Amount"
-                        className="border border-gray-300 rounded-md px-2 py-1"
-                      />
-                    </td>
-                    <td className="px-4 py-2 flex gap-2">
-                      <button
-                        onClick={handleSaveEditedExpense}
-                        className="bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700"
-                      >
-                        <FiCheck />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditingExpenseId(null);
-                          setNewExpense(null);
-                        }}
-                        className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
-                      >
-                        <FiX />
-                      </button>
-                    </td>
-                  </>
+                  </tr>
                 ) : (
                   <>
-                    <td className="px-4 py-2">{new Date(expense.date).toLocaleDateString()}</td>
-                    <td className="px-4 py-2">{expense.fullName}</td>
-                    <td className="px-4 py-2">{expense.description}</td>
-                    <td className="px-4 py-2">₦{expense.amount.toLocaleString()}</td>
-                    <td className="px-4 py-2 flex gap-2">
-                      <button
-                        className="text-blue-600 hover:text-blue-800"
-                        onClick={() => handleEditExpense(expense)}
-                        disabled={!!editingExpenseId} // Disable edit button when already editing
-                      >
-                        <img src={edit} alt="Edit" className="w-5 h-5" />
-                      </button>
-                      <button
-                        className="text-red-600 hover:text-red-800"
-                        onClick={() => {
-                          setDeleteId(expense.id);
-                          setDeleteType("expense");
-                        }}
-                        disabled={!!editingExpenseId} // Disable delete button when editing
-                      >
-                        <FiTrash2 size={20} />
-                      </button>
-                    </td>
+                    {expenses.map((expense) => (
+                      <tr key={expense.id} className="border-b border-gray-400">
+                        {editingExpenseId === expense.id ? (
+                          <>
+                            <td className="px-4 py-2">
+                              <input
+                                type="date"
+                                value={newExpense.date}
+                                onChange={(e) =>
+                                  setNewExpense({ ...newExpense, date: e.target.value })
+                                }
+                                className="border border-gray-300 rounded-md px-2 py-1"
+                              />
+                            </td>
+                            <td className="px-4 py-2">
+                              <select
+                                value={newExpense.investorId}
+                                onChange={(e) =>
+                                  setNewExpense({ ...newExpense, investorId: e.target.value })
+                                }
+                                className="border border-gray-300 rounded-md px-2 py-1"
+                              >
+                                <option value="">Select Investor</option>
+                                {users.map((user) => (
+                                  <option key={user.id} value={user.id}>
+                                    {user.fullName}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="text"
+                                value={newExpense.description}
+                                onChange={(e) =>
+                                  setNewExpense({ ...newExpense, description: e.target.value })
+                                }
+                                placeholder="Description"
+                                className="border border-gray-300 rounded-md px-2 py-1"
+                              />
+                            </td>
+                            <td className="px-4 py-2">
+                              <input
+                                type="number"
+                                value={newExpense.amount}
+                                onChange={(e) =>
+                                  setNewExpense({ ...newExpense, amount: e.target.value })
+                                }
+                                placeholder="Amount"
+                                className="border border-gray-300 rounded-md px-2 py-1"
+                              />
+                            </td>
+                            <td className="px-4 py-2 flex gap-2">
+                              <button
+                                onClick={handleSaveEditedExpense}
+                                className="bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700"
+                              >
+                                <FiCheck />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingExpenseId(null);
+                                  setNewExpense(null);
+                                }}
+                                className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
+                              >
+                                <FiX />
+                              </button>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="px-4 py-2">{new Date(expense.date).toLocaleDateString()}</td>
+                            <td className="px-4 py-2">{expense.fullName}</td>
+                            <td className="px-4 py-2">{expense.description}</td>
+                            <td className="px-4 py-2">₦{expense.amount.toLocaleString()}</td>
+                            <td className="px-4 py-2 flex gap-2">
+                              <button
+                                className="text-blue-600 hover:text-blue-800"
+                                onClick={() => handleEditExpense(expense)}
+                                disabled={!!editingExpenseId} // Disable edit button when already editing
+                              >
+                                <img src={edit} alt="Edit" className="w-5 h-5" />
+                              </button>
+                              <button
+                                className="text-red-600 hover:text-red-800"
+                                onClick={() => {
+                                  setDeleteId(expense.id);
+                                  setDeleteType("expense");
+                                }}
+                                disabled={!!editingExpenseId} // Disable delete button when editing
+                              >
+                                <FiTrash2 size={20} />
+                              </button>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    ))}
+                    {/* Only show new row if not currently editing */}
+                    {newExpense && !editingExpenseId && (
+                      <tr className="border-b border-gray-400">
+                        <td className="px-4 py-2">
+                          <input
+                            type="date"
+                            value={newExpense.date}
+                            onChange={(e) =>
+                              setNewExpense({ ...newExpense, date: e.target.value })
+                            }
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          />
+                        </td>
+                        <td className="px-4 py-2">
+                          <select
+                            value={newExpense.investorId}
+                            onChange={(e) =>
+                              setNewExpense({ ...newExpense, investorId: e.target.value })
+                            }
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          >
+                            <option value="">Select Investor</option>
+                            {users.map((user) => (
+                              <option key={user.id} value={user.id}>
+                                {user.fullName}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="text"
+                            value={newExpense.description}
+                            onChange={(e) =>
+                              setNewExpense({ ...newExpense, description: e.target.value })
+                            }
+                            placeholder="Description"
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          />
+                        </td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="number"
+                            value={newExpense.amount}
+                            onChange={(e) =>
+                              setNewExpense({ ...newExpense, amount: e.target.value })
+                            }
+                            placeholder="Amount"
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          />
+                        </td>
+                        <td className="px-4 py-2 flex gap-2">
+                          <button
+                            onClick={handleSaveExpense}
+                            className="bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700"
+                          >
+                            <FiCheck />
+                          </button>
+                          <button
+                            onClick={() => setNewExpense(null)}
+                            className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
+                          >
+                            <FiX />
+                          </button>
+                        </td>
+                      </tr>
+                    )}
                   </>
                 )}
-              </tr>
-            ))}
-            {/* Only show new row if not currently editing */}
-            {newExpense && !editingExpenseId && (
-              <tr className="border-b border-gray-400">
-                <td className="px-4 py-2">
-                  <input
-                    type="date"
-                    value={newExpense.date}
-                    onChange={(e) =>
-                      setNewExpense({ ...newExpense, date: e.target.value })
-                    }
-                    className="border border-gray-300 rounded-md px-2 py-1"
-                  />
-                </td>
-                <td className="px-4 py-2">
-                  <select
-                    value={newExpense.investorId}
-                    onChange={(e) =>
-                      setNewExpense({ ...newExpense, investorId: e.target.value })
-                    }
-                    className="border border-gray-300 rounded-md px-2 py-1"
-                  >
-                    <option value="">Select Investor</option>
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.fullName}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="px-4 py-2">
-                  <input
-                    type="text"
-                    value={newExpense.description}
-                    onChange={(e) =>
-                      setNewExpense({ ...newExpense, description: e.target.value })
-                    }
-                    placeholder="Description"
-                    className="border border-gray-300 rounded-md px-2 py-1"
-                  />
-                </td>
-                <td className="px-4 py-2">
-                  <input
-                    type="number"
-                    value={newExpense.amount}
-                    onChange={(e) =>
-                      setNewExpense({ ...newExpense, amount: e.target.value })
-                    }
-                    placeholder="Amount"
-                    className="border border-gray-300 rounded-md px-2 py-1"
-                  />
-                </td>
-                <td className="px-4 py-2 flex gap-2">
-                  <button
-                    onClick={handleSaveExpense}
-                    className="bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700"
-                  >
-                    <FiCheck />
-                  </button>
-                  <button
-                    onClick={() => setNewExpense(null)}
-                    className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
-                  >
-                    <FiX />
-                  </button>
-                </td>
-              </tr>
-            )}
-          </>
-        )}
-      </tbody>
-    </table>
-  </div>
-</div>
-      </section>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
 
       {/* Delete Confirmation */}
       {deleteId && (

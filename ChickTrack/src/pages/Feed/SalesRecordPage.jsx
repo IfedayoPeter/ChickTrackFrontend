@@ -8,6 +8,8 @@ import { sortByDate } from "../../utils/sortUtils";
 import ascendingIcon from "../../images/sort-ascending.svg";
 import descendingIcon from "../../images/sort-descending.svg";
 import editIcon from "../../images/edit.svg";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 const API_URL = "https://chicktrack.runasp.net/api/SaleRecord"; 
 
@@ -149,243 +151,245 @@ const SalesRecordPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Header />
+      <main className="flex-grow container mx-auto px-4 py-6">
+        {/* Sidebar */}
+        <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            {/* Hamburger Menu */}
-            <button className="text-gray-500" onClick={() => setSidebarOpen(true)}>
-              <FiMenu size={24} />
-            </button>
-            {/* Title */}
-            <h1 className="text-xl font-bold text-gray-800">Sales Record</h1>
-          </div>
-        </div>
-      </header>
-
-      {/* Sales Record Section */}
-      <section className="container mx-auto px-4 py-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">Sales Record</h2>
-
-        {/* Notification */}
-        {notification && <Notification notification={notification} />}
-
-        {/* Delete Confirmation */}
-        {deleteId && (
-          <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-              <p className="text-lg font-bold mb-4">Are you sure you want to delete this record?</p>
-              <div className="flex justify-center gap-4">
-                <button
-                  className="bg-green-600 text-white p-3 rounded-full hover:bg-green-700"
-                  onClick={handleDeleteRow}
-                >
-                  <FiCheck size={20} />
-                </button>
-                <button
-                  className="bg-red-600 text-white p-3 rounded-full hover:bg-red-700"
-                  onClick={() => setDeleteId(null)}
-                >
-                  <FiX size={20} />
-                </button>
-              </div>
+        {/* Header */}
+        <header className="bg-white shadow-sm">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              {/* Hamburger Menu */}
+              <button className="text-gray-500" onClick={() => setSidebarOpen(true)}>
+                <FiMenu size={24} />
+              </button>
+              {/* Title */}
+              <h1 className="text-xl font-bold text-gray-800">Sales Record</h1>
             </div>
           </div>
-        )}
+        </header>
 
-        {/* Sort Buttons */}
-        <div className="flex justify-between items-center mb-4">
-          <Search onSearch={fetchSalesRecords} />
-          <div className="flex gap-2 mb-4">
-            <button
-              onClick={() => handleSort("asc")}
-              className="flex items-center gap-2 bg- text-gray-800 px-4 py-2 rounded-l-md hover:bg-gray-300"
-            >
-              <img src={ascendingIcon} alt="Ascending" className="w-6 h-6" />
-            </button>
-            <button
-              onClick={() => handleSort("desc")}
-              className="flex items-center gap-2 bg-transparent text-gray-800 px-4 py-2 rounded-r-md hover:bg-gray-300"
-            >
-              <img src={descendingIcon} alt="Descending" className="w-6 h-6" />
-            </button>
+        {/* Sales Record Section */}
+        <section className="container mx-auto px-4 py-6">
+          {/* Notification */}
+          {notification && <Notification notification={notification} />}
+
+          {/* Delete Confirmation */}
+          {deleteId && (
+            <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+                <p className="text-lg font-bold mb-4">Are you sure you want to delete this record?</p>
+                <div className="flex justify-center gap-4">
+                  <button
+                    className="bg-green-600 text-white p-3 rounded-full hover:bg-green-700"
+                    onClick={handleDeleteRow}
+                  >
+                    <FiCheck size={20} />
+                  </button>
+                  <button
+                    className="bg-red-600 text-white p-3 rounded-full hover:bg-red-700"
+                    onClick={() => setDeleteId(null)}
+                  >
+                    <FiX size={20} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sort Buttons */}
+          <div className="flex justify-between items-center mb-4">
+            <Search onSearch={fetchSalesRecords} />
+            <div className="flex gap-2 mb-4">
+              <button
+                onClick={() => handleSort("asc")}
+                className="flex items-center gap-2 bg- text-gray-800 px-4 py-2 rounded-l-md hover:bg-gray-300"
+              >
+                <img src={ascendingIcon} alt="Ascending" className="w-6 h-6" />
+              </button>
+              <button
+                onClick={() => handleSort("desc")}
+                className="flex items-center gap-2 bg-transparent text-gray-800 px-4 py-2 rounded-r-md hover:bg-gray-300"
+              >
+                <img src={descendingIcon} alt="Descending" className="w-6 h-6" />
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Sales Table */}
-        <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-          <table className="min-w-full text-sm text-left text-gray-500">
-            <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
-              <tr>
-                <th className="px-4 py-2">Brands</th>
-                <th className="px-4 py-2">Unit</th>
-                <th className="px-4 py-2">Quantity</th>
-                <th className="px-4 py-2">Price</th>
-                <th className="px-4 py-2">Buyer</th>
-                <th className="px-4 py-2">Date</th>
-                <th className="px-4 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
+          {/* Sales Table */}
+          <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+            <table className="min-w-full text-sm text-left text-gray-500">
+              <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
                 <tr>
-                  <td className="px-4 py-2 text-center" colSpan="7">
-                    <LoadingAnimation />
-                  </td>
+                  <th className="px-4 py-2">Brands</th>
+                  <th className="px-4 py-2">Unit</th>
+                  <th className="px-4 py-2">Quantity</th>
+                  <th className="px-4 py-2">Price</th>
+                  <th className="px-4 py-2">Buyer</th>
+                  <th className="px-4 py-2">Date</th>
+                  <th className="px-4 py-2">Actions</th>
                 </tr>
-              ) : (
-                salesRecords.map((record) => (
-                  <tr key={record.id} className="border-b border-gray-400">
-                    {editingRecordId === record.id ? (
-                      <>
-                        <td className="px-4 py-2">
-                          <select
-                            value={newSalesRecord.feedBrand}
-                            onChange={(e) =>
-                              setNewSalesRecord({ ...newSalesRecord, feedBrand: e.target.value })
-                            }
-                            className="border border-gray-300 rounded-md px-2 py-1"
-                          >
-                            <option value="" disabled hidden>Select Brand</option>
-                            {FEED_BRANDS.map((brand) => (
-                              <option key={brand.value} value={brand.value}>
-                                {brand.label}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="px-4 py-2">
-                          <select
-                            value={newSalesRecord.feedSalesUnitId}
-                            onChange={(e) =>
-                              setNewSalesRecord({ ...newSalesRecord, feedSalesUnitId: e.target.value })
-                            }
-                            className="border border-gray-300 rounded-md px-2 py-1"
-                          >
-                            <option value="" disabled hidden>Select unit</option>
-                            {FEED_UNITS.map((unit) => (
-                              <option key={unit.value} value={unit.value}>
-                                {unit.label}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="px-4 py-2">
-                          <input
-                            type="number"
-                            value={newSalesRecord.quantity}
-                            onChange={(e) => {
-                              const value = Math.max(0, e.target.value); // Prevent negative values
-                              setNewSalesRecord({ ...newSalesRecord, quantity: value });
-                            }}
-                            className="border border-gray-300 rounded-md px-2 py-1"
-                          />
-                        </td>
-                        <td className="px-4 py-2">
-                          <input
-                            type="number"
-                            value={newSalesRecord.price}
-                            onChange={(e) => {
-                              const value = Math.max(0, e.target.value); // Prevent negative values
-                              setNewSalesRecord({ ...newSalesRecord, price: value });
-                            }}
-                            className="border border-gray-300 rounded-md px-2 py-1"
-                          />
-                        </td>
-                        <td className="px-4 py-2">
-                          <input
-                            type="text"
-                            value={newSalesRecord.buyerName}
-                            onChange={(e) =>
-                              setNewSalesRecord({ ...newSalesRecord, buyerName: e.target.value })
-                            }
-                            className="border border-gray-300 rounded-md px-2 py-1"
-                          />
-                        </td>
-                        <td className="px-4 py-2">
-                          <input
-                            type="date"
-                            value={newSalesRecord.date}
-                            onChange={(e) =>
-                              setNewSalesRecord({ ...newSalesRecord, date: e.target.value })
-                            }
-                            className="border border-gray-300 rounded-md px-2 py-1"
-                          />
-                        </td>
-                        <td className="px-4 py-2 flex gap-2">
-                          <button
-                            onClick={handleSaveSalesRecord}
-                            className="bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700"
-                          >
-                            <FiCheck />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setEditingRecordId(null);
-                              setNewSalesRecord(null);
-                            }}
-                            className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
-                          >
-                            <FiX />
-                          </button>
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="px-4 py-2">{record.feedBrandName || "N/A"}</td>
-                        <td className="px-4 py-2">{record.feedSalesUnit?.unitName || "N/A"}</td>
-                        <td className="px-4 py-2">{record.quantity}</td>
-                        <td className="px-4 py-2">{record.price.toLocaleString()}</td>
-                        <td className="px-4 py-2">{record.buyerName}</td>
-                        <td className="px-4 py-2">{record.date}</td>
-                        <td className="px-4 py-2 flex gap-2">
-                          <button
-                            className="text-blue-600 hover:text-blue-800"
-                            onClick={() => handleEditSalesRecord(record)}
-                          >
-                            <img src={editIcon} alt="Edit" className="w-5 h-5" />
-                          </button>
-                          <button
-                            className="text-red-600 hover:text-red-800"
-                            onClick={() => setDeleteId(record.id)}
-                          >
-                            <FiTrash2 size={20} />
-                          </button>
-                        </td>
-                      </>
-                    )}
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td className="px-4 py-2 text-center" colSpan="7">
+                      <LoadingAnimation />
+                    </td>
                   </tr>
-                ))
+                ) : (
+                  salesRecords.map((record) => (
+                    <tr key={record.id} className="border-b border-gray-400">
+                      {editingRecordId === record.id ? (
+                        <>
+                          <td className="px-4 py-2">
+                            <select
+                              value={newSalesRecord.feedBrand}
+                              onChange={(e) =>
+                                setNewSalesRecord({ ...newSalesRecord, feedBrand: e.target.value })
+                              }
+                              className="border border-gray-300 rounded-md px-2 py-1"
+                            >
+                              <option value="" disabled hidden>Select Brand</option>
+                              {FEED_BRANDS.map((brand) => (
+                                <option key={brand.value} value={brand.value}>
+                                  {brand.label}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-4 py-2">
+                            <select
+                              value={newSalesRecord.feedSalesUnitId}
+                              onChange={(e) =>
+                                setNewSalesRecord({ ...newSalesRecord, feedSalesUnitId: e.target.value })
+                              }
+                              className="border border-gray-300 rounded-md px-2 py-1"
+                            >
+                              <option value="" disabled hidden>Select unit</option>
+                              {FEED_UNITS.map((unit) => (
+                                <option key={unit.value} value={unit.value}>
+                                  {unit.label}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-4 py-2">
+                            <input
+                              type="number"
+                              value={newSalesRecord.quantity}
+                              onChange={(e) => {
+                                const value = Math.max(0, e.target.value); // Prevent negative values
+                                setNewSalesRecord({ ...newSalesRecord, quantity: value });
+                              }}
+                              className="border border-gray-300 rounded-md px-2 py-1"
+                            />
+                          </td>
+                          <td className="px-4 py-2">
+                            <input
+                              type="number"
+                              value={newSalesRecord.price}
+                              onChange={(e) => {
+                                const value = Math.max(0, e.target.value); // Prevent negative values
+                                setNewSalesRecord({ ...newSalesRecord, price: value });
+                              }}
+                              className="border border-gray-300 rounded-md px-2 py-1"
+                            />
+                          </td>
+                          <td className="px-4 py-2">
+                            <input
+                              type="text"
+                              value={newSalesRecord.buyerName}
+                              onChange={(e) =>
+                                setNewSalesRecord({ ...newSalesRecord, buyerName: e.target.value })
+                              }
+                              className="border border-gray-300 rounded-md px-2 py-1"
+                            />
+                          </td>
+                          <td className="px-4 py-2">
+                            <input
+                              type="date"
+                              value={newSalesRecord.date}
+                              onChange={(e) =>
+                                setNewSalesRecord({ ...newSalesRecord, date: e.target.value })
+                              }
+                              className="border border-gray-300 rounded-md px-2 py-1"
+                            />
+                          </td>
+                          <td className="px-4 py-2 flex gap-2">
+                            <button
+                              onClick={handleSaveSalesRecord}
+                              className="bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700"
+                            >
+                              <FiCheck />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingRecordId(null);
+                                setNewSalesRecord(null);
+                              }}
+                              className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
+                            >
+                              <FiX />
+                            </button>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-4 py-2">{record.feedBrandName || "N/A"}</td>
+                          <td className="px-4 py-2">{record.feedSalesUnit?.unitName || "N/A"}</td>
+                          <td className="px-4 py-2">{record.quantity}</td>
+                          <td className="px-4 py-2">{record.price.toLocaleString()}</td>
+                          <td className="px-4 py-2">{record.buyerName}</td>
+                          <td className="px-4 py-2">{record.date}</td>
+                          <td className="px-4 py-2 flex gap-2">
+                            <button
+                              className="text-blue-600 hover:text-blue-800"
+                              onClick={() => handleEditSalesRecord(record)}
+                            >
+                              <img src={editIcon} alt="Edit" className="w-5 h-5" />
+                            </button>
+                            <button
+                              className="text-red-600 hover:text-red-800"
+                              onClick={() => setDeleteId(record.id)}
+                            >
+                              <FiTrash2 size={20} />
+                            </button>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+              {!loading && (
+                <tfoot>
+                  <tr className="bg-gray-200 font-bold border-t border-gray-400">
+                    <td className="px-4 py-2" colSpan="3">Total</td> {/* Adjust colspan */}
+                    <td className="px-4 py-2 text-left">₦{calculateTotalAmount().toLocaleString()}</td> {/* Align under Amount */}
+                    <td className="px-4 py-2" colSpan="3"></td> {/* Empty columns */}
+                  </tr>
+                </tfoot>
               )}
-            </tbody>
-            {!loading && (
-              <tfoot>
-                <tr className="bg-gray-200 font-bold border-t border-gray-400">
-                  <td className="px-4 py-2" colSpan="3">Total</td> {/* Adjust colspan */}
-                  <td className="px-4 py-2 text-left">₦{calculateTotalAmount().toLocaleString()}</td> {/* Align under Amount */}
-                  <td className="px-4 py-2" colSpan="3"></td> {/* Empty columns */}
-                </tr>
-              </tfoot>
-            )}
-          </table>
-        </div>
-
-        {/* Record Sales Button */}
-        {!loading && (
-          <div className="flex justify-center mt-6">
-            <button
-              className="bg-blue-800 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-600"
-              onClick={() => window.location.href = "/recordsales"}
-            >
-              Record sales <img src={recordsIcon} alt="Record Sales" className="inline-block ml-2 w-5 h-5" />
-            </button>
+            </table>
           </div>
-        )}
-      </section>
+
+          {/* Record Sales Button */}
+          {!loading && (
+            <div className="flex justify-center mt-6">
+              <button
+                className="bg-blue-800 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-600"
+                onClick={() => window.location.href = "/recordsales"}
+              >
+                Record sales <img src={recordsIcon} alt="Record Sales" className="inline-block ml-2 w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </section>
+      </main>
+      <Footer />
     </div>
   );
 };

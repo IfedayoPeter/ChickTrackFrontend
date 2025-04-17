@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiChevronUp, FiChevronDown } from "react-icons/fi";
 import Bird from "../images/bird.svg";
@@ -13,6 +13,8 @@ const Header = () => {
   const navigate = useNavigate();
   const [feedAccordionOpen, setFeedAccordionOpen] = useState(false);
   const [profileAccordionOpen, setProfileAccordionOpen] = useState(false);
+  const feedRef = useRef(null);
+  const profileRef = useRef(null);
 
   const sidebarLinks = [
     { 
@@ -22,7 +24,7 @@ const Header = () => {
     },
     {
       name: "Feed",
-      icon: <img src={Feed} alt="Feed" className="w-6 h-6 lg:mr-4" />,
+      icon: <img src={Feed} alt="Feed" className="w-6 h-6 lg:mr-4 md:mr-4" />,
       isAccordion: true,
       subLinks: [
         { name: "Feed Inventory", action: () => navigate("/feedInventory") },
@@ -60,19 +62,57 @@ const Header = () => {
     { name: "Logout", action: () => navigate("/logout") },
   ];
 
+  // Close accordions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (feedRef.current && !feedRef.current.contains(event.target)) {
+        setFeedAccordionOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileAccordionOpen(false);
+      }
+    };
+
+    // Close accordions when scrolling
+    const handleScroll = () => {
+      setFeedAccordionOpen(false);
+      setProfileAccordionOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("scroll", handleScroll);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // Close the other accordion when one opens
+  useEffect(() => {
+    if (feedAccordionOpen) {
+      setProfileAccordionOpen(false);
+    }
+  }, [feedAccordionOpen]);
+
+  useEffect(() => {
+    if (profileAccordionOpen) {
+      setFeedAccordionOpen(false);
+    }
+  }, [profileAccordionOpen]);
+
   return (
-    <header className="bg-gray-800 shadow-sm py-4 px-6 flex flex-col">
+    <header className="bg-gray-800 shadow-sm py-4 px-6 flex flex-col sticky top-0 z-50">
       <div className="flex justify-between items-center">
         {/* ChickTrack Branding on the left */}
         <div className="hidden sm:block text-white font-bold text-xl cursor-pointer" onClick={() => navigate("/")}>
-  ChickTrack
-</div>
-
+          ChickTrack
+        </div>
 
         {/* Main Navigation */}
         <nav className="flex justify-center items-center gap-6">
           {sidebarLinks.map((link, index) => (
-            <div key={index} className="relative">
+            <div key={index} className="relative" ref={link.isAccordion ? feedRef : null}>
               {link.isAccordion ? (
                 <div className="flex flex-col items-center">
                   <button
@@ -117,13 +157,13 @@ const Header = () => {
         </nav>
 
         {/* Profile Accordion on the right */}
-        <div className="relative">
+        <div className="relative" ref={profileRef}>
           <button
             onClick={() => setProfileAccordionOpen(!profileAccordionOpen)}
             className="flex flex-col items-center text-white hover:text-gray-400"
           >
             <div className="text-2xl md:text-base">
-              <img src={Profile} alt="Profile" className="w-6 h-6" />
+              <img src={Profile} alt="Profile" className="w-6 h-6 lg:mr-4 md:mr-4" />
             </div>
             <div className="flex items-center gap-1">
               <span className="text-xs md:block hidden">Profile</span>
@@ -135,7 +175,7 @@ const Header = () => {
             </div>
           </button>
           {profileAccordionOpen && (
-            <div className="absolute top-full right-0 bg-gray-600 text-white rounded shadow-lg mt-2 w-48 z-10">
+            <div className="absolute top-full right-0 bg-gray-600 text-white rounded shadow-lg ml-10 mt-5 w-48 z-10">
               {profileLinks.map((link, index) => (
                 <button
                   key={index}

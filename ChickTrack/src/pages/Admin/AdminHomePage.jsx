@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "../../components/AdminSidebar";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 import { FiMenu, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { FaKiwiBird, FaEgg, FaMoneyBillWave, FaSeedling } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -50,12 +52,12 @@ const AdminHomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Sidebar */}
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      <Header />
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="block lg:hidden bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             {/* Hamburger Menu */}
@@ -91,10 +93,9 @@ const AdminHomePage = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="flex-grow container mx-auto px-4 py-6">
         {/* Overview Section */}
-        <h2 className="text-lg font-bold text-gray-800 mb-4">Overview</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">Overview</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {overviewCards.map((card, index) => (
             <div key={index} className="bg-white shadow-md rounded-lg p-4 text-center">
@@ -141,6 +142,7 @@ const AdminHomePage = () => {
           ))}
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

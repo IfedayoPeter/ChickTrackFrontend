@@ -4,6 +4,8 @@ import { LoadingAnimation, Notification } from "../../components/CommonComponent
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { calculateTotalProfit } from "./TotalSalesPage"; // Import calculateTotalProfit
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 const API_URL = "https://chicktrack.runasp.net/api/FeedLog?page=1&pageSize=100";
 
@@ -75,26 +77,11 @@ const FeedLogPage = () => {
   const currentSalesBalance = totalSales - totalProfit;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Header />
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            {/* Hamburger Menu */}
-            <button className="text-gray-500" onClick={() => setSidebarOpen(true)}>
-              <FiMenu size={24} />
-            </button>
-            {/* Title */}
-            <h1 className="text-xl font-bold text-gray-800">Feed Log</h1>
-          </div>
-        </div>
-      </header>
-
-      {/* Feed Log Section */}
-      <section className="container mx-auto px-4 py-6">
+      <main className="flex-grow container mx-auto px-4 py-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">Feeds Log Table</h2>
 
         {/* Notification */}
@@ -195,7 +182,8 @@ const FeedLogPage = () => {
             <p className="text-lg font-bold text-gray-800">₦{(totalSales - totalProfit).toLocaleString()}</p>
           </div>
         </div>
-      </section>
+      </main>
+      <Footer />
     </div>
   );
 };

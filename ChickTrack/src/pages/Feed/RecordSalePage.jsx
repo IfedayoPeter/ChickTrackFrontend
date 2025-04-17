@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 import { SALES_TYPES, FEED_BRANDS, FEED_UNITS } from "../../constants";
 import { LoadingAnimation, Notification } from "../../components/CommonComponents";
 
@@ -82,8 +84,9 @@ const RecordSalePage = () => {
   };
 
   return (
-    <div className="h-screen w-screen bg-gray-100">
-      <div className="bg-white h-full w-full p-6 relative">
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      <Header />
+      <main className="flex-grow bg-white p-6 relative">
         {/* Close Icon */}
         <button
           onClick={() => navigate(-1)} // Navigate back to the previous page
@@ -192,7 +195,8 @@ const RecordSalePage = () => {
             </div>
           </form>
         )}
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 };

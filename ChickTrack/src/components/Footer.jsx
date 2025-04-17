@@ -17,8 +17,8 @@ const Footer = () => {
     <footer className="bg-gray-800 text-white py-6 px-4">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
         <div className="mb-4 md:mb-0">
-          <p className="text-sm">© 2023 ChickTrack. All rights reserved.</p>
-          <p className="text-sm">123 Poultry Lane, Farmville, USA</p>
+          <p className="text-sm">© 2025 ChickTrack. All rights reserved.</p>
+          <p className="text-sm">123 Poultry Lane, ChickTown</p>
         </div>
         <div className="flex gap-4 mb-4 md:mb-0">
           <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
