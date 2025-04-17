@@ -7,6 +7,7 @@ import recordsIcon from "../../images/records.svg";
 import { sortByDate } from "../../utils/sortUtils";
 import ascendingIcon from "../../images/sort-ascending.svg";
 import descendingIcon from "../../images/sort-descending.svg";
+import editIcon from "../../images/edit.svg";
 
 const API_URL = "https://chicktrack.runasp.net/api/SaleRecord"; 
 
@@ -16,6 +17,8 @@ const SalesRecordPage = () => {
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+  const [editingRecordId, setEditingRecordId] = useState(null);
+  const [newSalesRecord, setNewSalesRecord] = useState(null);
 
   const fetchSalesRecords = async (queryString = "") => {
     setLoading(true);
@@ -51,6 +54,77 @@ const SalesRecordPage = () => {
     } finally {
       setLoading(false);
       setDeleteId(null);
+    }
+  };
+
+  const handleEditSalesRecord = (record) => {
+    setEditingRecordId(record.id);
+    setNewSalesRecord({
+      code: record.code,
+      salesType: record.salesType,
+      quantity: record.quantity,
+      price: record.price,
+      date: record.date,
+      buyerName: record.buyerName,
+      description: record.description,
+      feedBrand: record.feedBrand,
+      feedSalesUnitId: record.feedSalesUnit?.id,
+      id: record.id,
+    });
+  };
+
+  const handleSaveSalesRecord = async () => {
+    // Ensure feedBrand and feedSalesUnitId are integers
+    const updatedSalesRecord = {
+      ...newSalesRecord,
+      feedBrand: parseInt(newSalesRecord.feedBrand, 10),
+      feedSalesUnitId: parseInt(newSalesRecord.feedSalesUnitId, 10),
+    };
+
+    // Prevent negative values for quantity and price
+    if (updatedSalesRecord.quantity < 0 || updatedSalesRecord.price < 0) {
+      setNotification({
+        type: "error",
+        message: "Quantity and price cannot be negative.",
+      });
+      return;
+    }
+
+    const method = updatedSalesRecord.id ? "PUT" : "POST";
+    const url = updatedSalesRecord.id
+      ? `${API_URL}?id=${updatedSalesRecord.id}`
+      : API_URL;
+
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedSalesRecord),
+      });
+
+      if (response.ok) {
+        setNotification({
+          type: "success",
+          message: updatedSalesRecord.id
+            ? "Sales record updated successfully!"
+            : "Sales record added successfully!",
+        });
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        setNotification({
+          type: "error",
+          message: updatedSalesRecord.id
+            ? "Failed to update sales record. Please try again."
+            : "Failed to add sales record. Please try again.",
+        });
+      }
+    } catch (error) {
+      setNotification({
+        type: "error",
+        message: "An error occurred. Please try again.",
+      });
     }
   };
 
@@ -150,7 +224,7 @@ const SalesRecordPage = () => {
                 <th className="px-4 py-2">Brands</th>
                 <th className="px-4 py-2">Unit</th>
                 <th className="px-4 py-2">Quantity</th>
-                <th className="px-4 py-2">Amount</th>
+                <th className="px-4 py-2">Price</th>
                 <th className="px-4 py-2">Buyer</th>
                 <th className="px-4 py-2">Date</th>
                 <th className="px-4 py-2">Actions</th>
@@ -166,20 +240,124 @@ const SalesRecordPage = () => {
               ) : (
                 salesRecords.map((record) => (
                   <tr key={record.id} className="border-b border-gray-400">
-                    <td className="px-4 py-2">{record.feedBrandName || "N/A"}</td>
-                    <td className="px-4 py-2">{record.feedSalesUnit?.unitName || "N/A"}</td>
-                    <td className="px-4 py-2">{record.quantity}</td>
-                    <td className="px-4 py-2">{record.price.toLocaleString()}</td>
-                    <td className="px-4 py-2">{record.buyerName}</td>
-                    <td className="px-4 py-2">{record.date}</td>
-                    <td className="px-4 py-2">
-                      <button
-                        className="text-red-600 hover:text-red-800"
-                        onClick={() => setDeleteId(record.id)}
-                      >
-                        <FiTrash2 size={20} />
-                      </button>
-                    </td>
+                    {editingRecordId === record.id ? (
+                      <>
+                        <td className="px-4 py-2">
+                          <select
+                            value={newSalesRecord.feedBrand}
+                            onChange={(e) =>
+                              setNewSalesRecord({ ...newSalesRecord, feedBrand: e.target.value })
+                            }
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          >
+                            <option value="" disabled hidden>Select Brand</option>
+                            {FEED_BRANDS.map((brand) => (
+                              <option key={brand.value} value={brand.value}>
+                                {brand.label}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-4 py-2">
+                          <select
+                            value={newSalesRecord.feedSalesUnitId}
+                            onChange={(e) =>
+                              setNewSalesRecord({ ...newSalesRecord, feedSalesUnitId: e.target.value })
+                            }
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          >
+                            <option value="" disabled hidden>Select unit</option>
+                            {FEED_UNITS.map((unit) => (
+                              <option key={unit.value} value={unit.value}>
+                                {unit.label}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="number"
+                            value={newSalesRecord.quantity}
+                            onChange={(e) => {
+                              const value = Math.max(0, e.target.value); // Prevent negative values
+                              setNewSalesRecord({ ...newSalesRecord, quantity: value });
+                            }}
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          />
+                        </td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="number"
+                            value={newSalesRecord.price}
+                            onChange={(e) => {
+                              const value = Math.max(0, e.target.value); // Prevent negative values
+                              setNewSalesRecord({ ...newSalesRecord, price: value });
+                            }}
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          />
+                        </td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="text"
+                            value={newSalesRecord.buyerName}
+                            onChange={(e) =>
+                              setNewSalesRecord({ ...newSalesRecord, buyerName: e.target.value })
+                            }
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          />
+                        </td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="date"
+                            value={newSalesRecord.date}
+                            onChange={(e) =>
+                              setNewSalesRecord({ ...newSalesRecord, date: e.target.value })
+                            }
+                            className="border border-gray-300 rounded-md px-2 py-1"
+                          />
+                        </td>
+                        <td className="px-4 py-2 flex gap-2">
+                          <button
+                            onClick={handleSaveSalesRecord}
+                            className="bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700"
+                          >
+                            <FiCheck />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingRecordId(null);
+                              setNewSalesRecord(null);
+                            }}
+                            className="bg-red-600 text-white px-2 py-1 rounded-md hover:bg-red-700"
+                          >
+                            <FiX />
+                          </button>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="px-4 py-2">{record.feedBrandName || "N/A"}</td>
+                        <td className="px-4 py-2">{record.feedSalesUnit?.unitName || "N/A"}</td>
+                        <td className="px-4 py-2">{record.quantity}</td>
+                        <td className="px-4 py-2">{record.price.toLocaleString()}</td>
+                        <td className="px-4 py-2">{record.buyerName}</td>
+                        <td className="px-4 py-2">{record.date}</td>
+                        <td className="px-4 py-2 flex gap-2">
+                          <button
+                            className="text-blue-600 hover:text-blue-800"
+                            onClick={() => handleEditSalesRecord(record)}
+                          >
+                            <img src={editIcon} alt="Edit" className="w-5 h-5" />
+                          </button>
+                          <button
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => setDeleteId(record.id)}
+                          >
+                            <FiTrash2 size={20} />
+                          </button>
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))
               )}

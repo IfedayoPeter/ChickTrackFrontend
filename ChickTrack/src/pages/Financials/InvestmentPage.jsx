@@ -102,9 +102,6 @@ const InvestmentPage = () => {
         setTimeout(() => {
           window.location.reload();
         }, 2000);
-        setNewInvestment(null);
-        setEditingId(null); // Reset editing state
-        fetchInvestments();
       } else {
         setNotification({
           type: "error",
@@ -140,8 +137,6 @@ const InvestmentPage = () => {
         setTimeout(() => {
           window.location.reload();
         }, 2000);
-        setNewExpense(null);
-        fetchExpenses();
       } else {
         setNotification({ type: "error", message: "Failed to add expense. Please try again." });
         setTimeout(() => {
@@ -179,9 +174,6 @@ const InvestmentPage = () => {
         setTimeout(() => {
           window.location.reload();
         }, 2000);
-        setNewExpense(null);
-        setEditingExpenseId(null); // Reset editing state
-        fetchExpenses();
       } else {
         setNotification({
           type: "error",

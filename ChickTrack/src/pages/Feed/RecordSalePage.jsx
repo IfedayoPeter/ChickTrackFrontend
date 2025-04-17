@@ -23,7 +23,14 @@ const RecordSalePage = () => {
   const [loading, setLoading] = useState(false); // State for loading animation
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // Prevent negative values for quantity and price
+    if ((name === "quantity" || name === "price") && value < 0) {
+      return;
+    }
+
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
@@ -144,7 +151,14 @@ const RecordSalePage = () => {
             <div className="flex flex-col md:flex-row md:space-x-4">
               <div className="flex-1">
                 <label className="block text-sm font-normal mb-2">Quantity</label>
-                <input type="number" name="quantity" value={formData.quantity} onChange={handleChange} className="w-full text-sm border-2 border-gray-300 p-2 rounded-xl" required />
+                <input
+                  type="number"
+                  name="quantity"
+                  value={formData.quantity}
+                  onChange={handleChange}
+                  className="w-full text-sm border-2 border-gray-300 p-2 rounded-xl"
+                  required
+                />
               </div>
               <div className="flex-1">
                 <label className="block text-sm font-normal mb-2">Buyer</label>
@@ -156,7 +170,15 @@ const RecordSalePage = () => {
             <div className="flex flex-col md:flex-row md:space-x-4">
               <div className="flex-1">
                 <label className="block text-sm font-normal mb-2">Price</label>
-                <input type="number" step="0.01" name="price" value={formData.price} onChange={handleChange} className="w-full text-sm border-2 border-gray-300 p-2 rounded-xl" required />
+                <input
+                  type="number"
+                  step="0.01"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  className="w-full text-sm border-2 border-gray-300 p-2 rounded-xl"
+                  required
+                />
               </div>
               <div className="flex-1">
                 <label className="block text-sm font-normal mb-2">Description</label>
