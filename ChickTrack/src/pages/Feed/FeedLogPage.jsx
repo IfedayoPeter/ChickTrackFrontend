@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../components/AdminSidebar";
-import { LoadingAnimation, Notification } from "../../components/CommonComponents";
+import { LoadingAnimation, Notification, PageHeader, Search } from "../../components/CommonComponents";
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { calculateTotalProfit } from "./TotalSalesPage"; // Import calculateTotalProfit
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 
-const API_URL = "https://chicktrack.runasp.net/api/FeedLog?page=1&pageSize=100";
+const API_URL = "https://chicktrack.runasp.net/api/FeedLog";
 
 const FeedLogPage = () => {
   const [feedLogs, setFeedLogs] = useState([]);
@@ -19,10 +19,10 @@ const FeedLogPage = () => {
   const [totalProfit, setTotalProfit] = useState(0);
   const navigate = useNavigate();
 
-  const fetchFeedLogs = async () => {
+  const fetchFeedLogs = async (queryString ="") => {
     setLoading(true);
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch(`${API_URL}${queryString ? `?${queryString}` : ""}`);
       const data = await response.json();
       setFeedLogs(data.content || []);
     } catch (error) {
@@ -80,9 +80,13 @@ const FeedLogPage = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
+      {/* Page Header */}
+      <PageHeader title="Feed Log" onMenuClick={() => setSidebarOpen(true)} />
+      
       <main className="flex-grow container mx-auto px-4 py-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 text-center">Feeds Log Table</h2>
+        <div className="flex justify-between items-center mb-4">
+        <Search onSearch={fetchFeedLogs} />
+        </div>
 
         {/* Notification */}
         {notification && <Notification notification={notification} />}

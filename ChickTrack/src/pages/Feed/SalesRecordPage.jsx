@@ -143,12 +143,7 @@ const SalesRecordPage = () => {
     setSalesRecords(sortedRecords);
   };
 
-  const filterFields = [
-    { name: "feedBrandName", label: "Brand", type: "dropdown", options: FEED_BRANDS },
-    { name: "unit", label: "Unit", type: "dropdown", options: FEED_UNITS },
-    { name: "buyerName", label: "Buyer", placeholder: "Enter buyer name" },
-    { name: "date", label: "Date", type: "date" },
-  ];
+
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -188,7 +183,7 @@ const SalesRecordPage = () => {
             </div>
           )}
 
-          {/* Sort Buttons */}
+          {/* Sort and Search Buttons */}
           <div className="flex justify-between items-center mb-4">
             <Search onSearch={fetchSalesRecords} />
             <div className="flex gap-2 mb-4">

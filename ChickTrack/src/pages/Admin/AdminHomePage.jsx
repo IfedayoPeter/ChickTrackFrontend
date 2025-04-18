@@ -57,27 +57,27 @@ const AdminHomePage = () => {
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Header */}
-      <header className="block lg:hidden bg-white shadow-sm">
+      <header className="block lg:hidden bg-gray-800 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             {/* Hamburger Menu */}
-            <button className="text-gray-500" onClick={() => setSidebarOpen(true)}>
+            <button className="text-gray-200" onClick={() => setSidebarOpen(true)}>
               <FiMenu size={24} />
             </button>
             {/* Title */}
-            <h1 className="text-xl font-bold text-gray-800">Home</h1>
+            <h1 className="text-xl font-bold text-white">Home</h1>
           </div>
           {/* Dropdown */}
           <div className="relative">
             <button
-              className="flex items-center space-x-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-md"
+              className="flex items-center space-x-2 bg-white text-gray-700 px-4 py-2 rounded-md"
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
               <span>Monthly</span>
               <FiChevronDown />
             </button>
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-32 bg-white shadow-md rounded-md">
+              <div className="absolute right-0 mt-2 w-28 bg-white shadow-md rounded-md">
                 <button className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
                   Weekly
                 </button>

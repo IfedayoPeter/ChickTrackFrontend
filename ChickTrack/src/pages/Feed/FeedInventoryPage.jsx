@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../components/AdminSidebar";
-import { LoadingAnimation, Notification } from "../../components/CommonComponents";
+import { LoadingAnimation, Notification, PageHeader, Search } from "../../components/CommonComponents";
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { FEED_BRANDS } from "../../constants";
 import { calculateTotalProfit } from "./TotalSalesPage"; // Import calculateTotalProfit
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import edit from "../../images/edit.svg";
 
-const API_URL = "https://chicktrack.runasp.net/api/FeedInventory?page=1&pageSize=100"; // Updated to HTTPS
+const API_URL = "https://chicktrack.runasp.net/api/FeedInventory"; // Updated to HTTPS
 const TOTAL_SALES_API_URL = "https://chicktrack.runasp.net/api/TotalSales"; // Added TotalSales API URL
 
 const FeedInventoryPage = () => {
@@ -19,11 +20,12 @@ const FeedInventoryPage = () => {
   const [notification, setNotification] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [totalProfit, setTotalProfit] = useState(0); // Profit fetched from TotalSales API
+  const [editingId, setEditingId] = useState(null); // Add editing state
 
-  const fetchFeedInventory = async () => {
+  const fetchFeedInventory = async (queryString = "") => {
     setLoading(true);
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch(`${API_URL}${queryString ? `?${queryString}` : ""}`);
       const data = await response.json();
       setFeedInventory(data.content || []);
     } catch (error) {
@@ -109,6 +111,47 @@ const FeedInventoryPage = () => {
     }
   };
 
+  const handleEditRow = (record) => {
+    setEditingId(record.id);
+    setNewRow({
+      id: record.id,
+      code: record.code,
+      feedBrand: record.feedBrand,
+      bagsBought: record.bagsBought,
+      amount: record.amount,
+      date: new Date(record.date).toISOString().split("T")[0],
+    });
+  };
+
+  const handleSaveEditedRow = async () => {
+    setSaving(true);
+    setNotification(null);
+    try {
+      const response = await fetch(`https://chicktrack.runasp.net/api/FeedInventory?id=${newRow.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newRow),
+      });
+
+      if (response.ok) {
+        setNotification({ type: "success", message: "Feed inventory updated successfully!" });
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        setNotification({ type: "error", message: "Failed to update feed inventory. Please try again." });
+      }
+    } catch (error) {
+      setNotification({ type: "error", message: "An error occurred. Please try again." });
+    } finally {
+      setSaving(false);
+      setEditingId(null);
+      setNewRow(null);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewRow((prev) => ({
@@ -130,11 +173,14 @@ const FeedInventoryPage = () => {
       <Header />
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
+      {/* Page Header */}
+      <PageHeader title="Feed Inventory" onMenuClick={() => setSidebarOpen(true)} />
+
       <main className="flex-grow container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold text-gray-800">Feed Inventory</h2>
+          <Search onSearch={fetchFeedInventory} />
           <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 mb-4"
             onClick={handleAddRow}
           >
             Add
@@ -190,21 +236,93 @@ const FeedInventoryPage = () => {
                 <>
                   {feedInventory.map((record) => (
                     <tr key={record.id} className="border-b border-gray-400">
-                      <td className="px-4 py-2">{record.feedBrandName || "N/A"}</td>
-                      <td className="px-4 py-2">{record.bagsBought}</td>
-                      <td className="px-4 py-2">₦{record.amount.toLocaleString()}</td>
-                      <td className="px-4 py-2">{new Date(record.date).toLocaleDateString()}</td>
-                      <td className="px-4 py-2">
-                        <button
-                          className="text-red-500 hover:text-red-800"
-                          onClick={() => setDeleteId(record.id)}
-                        >
-                          <FiTrash2 size={20} />
-                        </button>
-                      </td>
+                      {editingId === record.id ? (
+                        <>
+                          <td className="px-4 py-2">
+                            <select
+                              name="feedBrand"
+                              value={newRow.feedBrand}
+                              onChange={handleInputChange}
+                              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value="">Select Brand</option>
+                              {FEED_BRANDS.map((brand) => (
+                                <option key={brand.value} value={brand.value}>
+                                  {brand.label}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-4 py-2">
+                            <input
+                              type="number"
+                              name="bagsBought"
+                              value={newRow.bagsBought}
+                              onChange={handleInputChange}
+                              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </td>
+                          <td className="px-4 py-2">
+                            <input
+                              type="number"
+                              name="amount"
+                              value={newRow.amount}
+                              onChange={handleInputChange}
+                              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </td>
+                          <td className="px-4 py-2">
+                            <input
+                              type="date"
+                              name="date"
+                              value={newRow.date}
+                              onChange={handleInputChange}
+                              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </td>
+                          <td className="px-4 py-2 flex gap-2">
+                            <button
+                              onClick={handleSaveEditedRow}
+                              className="bg-transparent text-green-600 px-2 py-1 rounded-md hover:bg-transparent mt-3"
+                            >
+                              <FiCheck />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingId(null);
+                                setNewRow(null);
+                              }}
+                              className="bg-transparent text-red-600 px-2 py-1 rounded-md hover:bg-red-700 mt-3"
+                            >
+                              <FiX />
+                            </button>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-4 py-2">{record.feedBrandName || "N/A"}</td>
+                          <td className="px-4 py-2">{record.bagsBought}</td>
+                          <td className="px-4 py-2">₦{record.amount.toLocaleString()}</td>
+                          <td className="px-4 py-2">{new Date(record.date).toLocaleDateString()}</td>
+                          <td className="px-4 py-2 flex gap-2">
+                            <button
+                              className="text-blue-600 hover:text-blue-800"
+                              onClick={() => handleEditRow(record)}
+                            >
+                              <img src={edit} alt="Edit" className="w-5 h-5" />
+                            </button>
+                            <button
+                              className="text-red-500 hover:text-red-800"
+                              onClick={() => setDeleteId(record.id)}
+                            >
+                              <FiTrash2 size={20} />
+                            </button>
+                          </td>
+                        </>
+                      )}
                     </tr>
                   ))}
-                  {newRow && (
+                  {newRow && !editingId && (
                     <tr className="border-b border-gray-400">
                       <td className="px-4 py-2">
                         <select
