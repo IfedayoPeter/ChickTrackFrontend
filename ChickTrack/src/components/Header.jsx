@@ -73,18 +73,9 @@ const Header = () => {
       }
     };
 
-    // Close accordions when scrolling
-    const handleScroll = () => {
-      setFeedAccordionOpen(false);
-      setProfileAccordionOpen(false);
-    };
-
     document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("scroll", handleScroll);
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -102,15 +93,15 @@ const Header = () => {
   }, [profileAccordionOpen]);
 
   return (
-    <header className="bg-gray-800 shadow-sm py-4 px-6 flex flex-col sticky top-0 z-50">
+    <header className="bg-gray-800 shadow-sm py-4 px-6 flex flex-col fixed bottom-0 w-full lg:sticky lg:top-0 z-50">
       <div className="flex justify-between items-center">
-        {/* ChickTrack Branding on the left */}
-        <div className="hidden sm:block text-white font-bold text-xl cursor-pointer" onClick={() => navigate("/")}>
+        {/* ChickTrack Branding - hidden on small/medium screens */}
+        <div className="hidden lg:block text-white font-bold text-xl cursor-pointer" onClick={() => navigate("/")}>
           ChickTrack
         </div>
 
         {/* Main Navigation */}
-        <nav className="flex justify-center items-center gap-6">
+        <nav className="flex justify-center items-center gap-4 sm:gap-6 w-full lg:w-auto">
           {sidebarLinks.map((link, index) => (
             <div key={index} className="relative" ref={link.isAccordion ? feedRef : null}>
               {link.isAccordion ? (
@@ -121,7 +112,7 @@ const Header = () => {
                   >
                     <div className="text-2xl md:text-base">{link.icon}</div>
                     <div className="flex items-center gap-1">
-                      <span className="text-xs md:block hidden">{link.name}</span>
+                      <span className="text-xs hidden sm:block">{link.name}</span>
                       {feedAccordionOpen ? (
                         <FiChevronUp className="text-xs" />
                       ) : (
@@ -130,7 +121,7 @@ const Header = () => {
                     </div>
                   </button>
                   {feedAccordionOpen && (
-                    <div className="absolute top-full left-0 bg-gray-600 text-white rounded shadow-lg mt-5 ml-6 w-48 z-10">
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-5 bg-gray-600 text-white rounded shadow-lg w-32 z-10 lg:top-full lg:bottom-auto lg:mt-5 lg:ml-6">
                       {link.subLinks.map((subLink, subIndex) => (
                         <button
                           key={subIndex}
@@ -149,24 +140,24 @@ const Header = () => {
                   className="flex flex-col items-center text-white hover:text-gray-400"
                 >
                   <div className="text-2xl md:text-base">{link.icon}</div>
-                  <span className="text-xs md:block hidden">{link.name}</span>
+                  <span className="text-xs hidden sm:block">{link.name}</span>
                 </button>
               )}
             </div>
           ))}
         </nav>
 
-        {/* Profile Accordion on the right */}
+        {/* Profile Accordion - positioned differently on small/medium vs large screens */}
         <div className="relative" ref={profileRef}>
           <button
             onClick={() => setProfileAccordionOpen(!profileAccordionOpen)}
             className="flex flex-col items-center text-white hover:text-gray-400"
           >
             <div className="text-2xl md:text-base">
-              <img src={Profile} alt="Profile" className="w-6 h-6 lg:mr-4 md:mr-4" />
+              <img src={Profile} alt="Profile" className="w-6 h-6 lg:mr-4" />
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-xs md:block hidden">Profile</span>
+              <span className="text-xs hidden sm:block">Profile</span>
               {profileAccordionOpen ? (
                 <FiChevronUp className="text-xs" />
               ) : (
@@ -175,7 +166,7 @@ const Header = () => {
             </div>
           </button>
           {profileAccordionOpen && (
-            <div className="absolute top-full right-0 bg-gray-600 text-white rounded shadow-lg ml-10 mt-5 w-48 z-10">
+            <div className="absolute bottom-full left-1/2 transform -translate-x-28 mb-5 bg-gray-600 text-white rounded shadow-lg w-32 z-10 lg:top-full lg:bottom-auto lg:right-0 lg:left-auto lg:transform-none lg:ml-10 lg:mt-5">
               {profileLinks.map((link, index) => (
                 <button
                   key={index}

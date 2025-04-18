@@ -158,15 +158,15 @@ const SalesRecordPage = () => {
         <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         {/* Header */}
-        <header className="bg-white shadow-sm">
+        <header className="bg-gray-800 shadow-sm">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center space-x-4">
               {/* Hamburger Menu */}
-              <button className="text-gray-500" onClick={() => setSidebarOpen(true)}>
+              <button className="text-gray-300" onClick={() => setSidebarOpen(true)}>
                 <FiMenu size={24} />
               </button>
               {/* Title */}
-              <h1 className="text-xl font-bold text-gray-800">Sales Record</h1>
+              <h1 className="text-xl font-bold text-white">Sales Record</h1>
             </div>
           </div>
         </header>
