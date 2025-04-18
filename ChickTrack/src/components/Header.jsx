@@ -51,7 +51,8 @@ const Header = () => {
     { 
       name: "Notifications", 
       icon: <img src={Bell} alt="Notification" className="w-6 h-6" />, 
-      action: () => navigate("/notification") 
+      action: () => navigate("/notification"),
+      className: "hidden sm:block md:hidden",
     },
   ];
 
@@ -101,7 +102,7 @@ const Header = () => {
         </div>
 
         {/* Main Navigation */}
-        <nav className="flex justify-center items-center gap-4 sm:gap-6 w-full lg:w-auto">
+        <nav className="flex justify-center items-center gap-4 sm:gap-10 w-full lg:w-auto">
           {sidebarLinks.map((link, index) => (
             <div key={index} className="relative" ref={link.isAccordion ? feedRef : null}>
               {link.isAccordion ? (
@@ -137,7 +138,7 @@ const Header = () => {
               ) : (
                 <button
                   onClick={link.action}
-                  className="flex flex-col items-center text-white hover:text-gray-400"
+                  className={`flex flex-col items-center text-white hover:text-gray-400 ${link.className || ""}`}
                 >
                   <div className="text-2xl md:text-base">{link.icon}</div>
                   <span className="text-xs hidden sm:block">{link.name}</span>
@@ -154,7 +155,7 @@ const Header = () => {
             className="flex flex-col items-center text-white hover:text-gray-400"
           >
             <div className="text-2xl md:text-base">
-              <img src={Profile} alt="Profile" className="w-6 h-6 lg:mr-4" />
+              <img src={Profile} alt="Profile" className="w-6 h-6 lg:mr-4 md:mr-4" />
             </div>
             <div className="flex items-center gap-1">
               <span className="text-xs hidden sm:block">Profile</span>

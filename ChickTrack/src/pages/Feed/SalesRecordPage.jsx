@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../components/AdminSidebar";
-import { LoadingAnimation, Notification, Search } from "../../components/CommonComponents"; 
+import { LoadingAnimation, Notification, Search, PageHeader } from "../../components/CommonComponents"; 
 import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { FEED_BRANDS, FEED_UNITS } from "../../constants";
 import recordsIcon from "../../images/records.svg";
@@ -153,23 +153,12 @@ const SalesRecordPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-6">
+      <main className="flex-grow container mx-auto lg:px-4 lg:py-6">
         {/* Sidebar */}
         <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        {/* Header */}
-        <header className="bg-gray-800 shadow-sm">
-          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              {/* Hamburger Menu */}
-              <button className="text-gray-300" onClick={() => setSidebarOpen(true)}>
-                <FiMenu size={24} />
-              </button>
-              {/* Title */}
-              <h1 className="text-xl font-bold text-white">Sales Record</h1>
-            </div>
-          </div>
-        </header>
+        {/* Page Header */}
+        <PageHeader title="Sales Record" onMenuClick={() => setSidebarOpen(true)} />
 
         {/* Sales Record Section */}
         <section className="container mx-auto px-4 py-6">

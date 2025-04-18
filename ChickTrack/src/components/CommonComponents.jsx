@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import searchIcon from "../images/search.svg";
 import clearIcon from "../images/clear.svg";
+import { FiMenu } from "react-icons/fi";
+import Bell from "../images/bell.svg";
 
 export const LoadingAnimation = () => (
   <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -55,36 +57,52 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
 export const Search = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [notification, setNotification] = useState(null);
 
   const handleSearch = () => {
     const queryString = searchTerm ? `search=${encodeURIComponent(searchTerm)}` : "";
-    onSearch(queryString);
+    const found = onSearch(queryString); // Assume this returns true if found, false if not
+
+    if (!found) {
+      setNotification({
+        type: "error",
+        message: `"${searchTerm}" not found.`,
+      });
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000); // Give the user 2 seconds to read the notification
+    }
   };
 
   return (
-    <div className="relative mb-4">
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Search"
-        className="w-44 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
-      />
-      <button
-        onClick={handleSearch}
-        className="absolute top-1/2 right-10 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-      >
-        <img src={searchIcon} alt="Search" className="w-5 h-5 ml-10" />
-      </button>
-      {searchTerm && (
+    <>
+      <div className="relative mb-4">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search"
+          className="w-60 px-4 py-2 border border-blue-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 pr-16"
+        />
         <button
-          onClick={() => setSearchTerm("")}
-          className="absolute top-1/2 right-2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+          onClick={handleSearch}
+          className="absolute top-1/2 right-10 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
         >
-          <img src={clearIcon} alt="Clear" className="w-5 h-5" />
+          <img src={searchIcon} alt="Search" className="w-5 h-5" />
         </button>
-      )}
-    </div>
+        {searchTerm && (
+          <button
+            onClick={() => setSearchTerm("")}
+            className="absolute top-1/2 right-2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+          >
+            <img src={clearIcon} alt="Clear" className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
+      {notification && <Notification notification={notification} />}
+    </>
   );
 };
 
@@ -98,4 +116,26 @@ export const RecordSalesButton = ({ onClick }) => {
     </button>
   );
 };
+
+export const PageHeader = ({ title, onMenuClick }) => (
+  <header className="bg-gray-800 shadow-sm lg:hidden">
+    <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="flex items-center space-x-4">
+        {/* Hamburger Menu */}
+        <button className="text-gray-300" onClick={onMenuClick}>
+          <FiMenu size={24} />
+        </button>
+        {/* Title */}
+        <h1 className="text-xl font-bold text-white">{title}</h1>
+      </div>
+      {/* Notification Icon */}
+      <button
+        className="text-gray-300"
+        onClick={() => alert("Notifications clicked!")} // Replace with actual notification logic
+      >
+        <img src={Bell} alt="Notification" className="w-6 h-6" />
+      </button>
+    </div>
+  </header>
+);
 
