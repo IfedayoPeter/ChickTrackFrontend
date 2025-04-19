@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../components/AdminSidebar";
 import { LoadingAnimation, Notification, Search, PageHeader } from "../../components/CommonComponents"; 
-import { FiMenu, FiTrash2, FiCheck, FiX } from "react-icons/fi";
+import { FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { FEED_BRANDS, FEED_UNITS } from "../../constants";
 import recordsIcon from "../../images/records.svg";
 import { sortByDate } from "../../utils/sortUtils";
@@ -10,6 +10,7 @@ import descendingIcon from "../../images/sort-descending.svg";
 import editIcon from "../../images/edit.svg";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import FilterComponent from "../../components/FilterComponent";
 
 const API_URL = "https://chicktrack.runasp.net/api/SaleRecord"; 
 
@@ -21,11 +22,57 @@ const SalesRecordPage = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [editingRecordId, setEditingRecordId] = useState(null);
   const [newSalesRecord, setNewSalesRecord] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 20;
 
-  const fetchSalesRecords = async (queryString = "") => {
+  const totalPages = Math.ceil(salesRecords.length / recordsPerPage);
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const paginatedRecords = salesRecords.slice(
+    (currentPage - 1) * recordsPerPage,
+    currentPage * recordsPerPage
+  );
+
+  // const fetchSalesRecords = async (queryString = "") => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await fetch(`${API_URL}${queryString ? `?${queryString}` : ""}`);
+  //     const data = await response.json();
+  //     setSalesRecords(data.content || []);
+  //   } catch (error) {
+  //     console.error("Error fetching sales records:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const fetchSalesRecords = async (filters = {}) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}${queryString ? `?${queryString}` : ""}`);
+      // Convert filters to query parameters
+      const queryParams = new URLSearchParams();
+      
+      // Add each filter to the query parameters
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) {
+          if (key === 'date' && Array.isArray(value)) {
+            // Handle date range filter
+            const [start, end] = value;
+            if (start) queryParams.append('startDate', start.toISOString());
+            if (end) queryParams.append('endDate', end.toISOString());
+          } else {
+            // Handle other filters
+            queryParams.append(key, value);
+          }
+        }
+      });
+  
+      const response = await fetch(`${API_URL}?${queryParams.toString()}`);
       const data = await response.json();
       setSalesRecords(data.content || []);
     } catch (error) {
@@ -34,6 +81,15 @@ const SalesRecordPage = () => {
       setLoading(false);
     }
   };
+
+  const filterColumns = [
+    { title: 'Brands', dataIndex: 'feedBrandName', key: 'feedBrandName' },
+    { title: 'Unit', dataIndex: 'feedSalesUnit.unitName', key: 'unit' },
+    { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
+    { title: 'Price', dataIndex: 'price', key: 'price' },
+    { title: 'Buyer', dataIndex: 'buyerName', key: 'buyerName' },
+    { title: 'Date', dataIndex: 'date', key: 'date' },
+  ];
 
   const handleDeleteRow = async () => {
     setLoading(true);
@@ -143,7 +199,23 @@ const SalesRecordPage = () => {
     setSalesRecords(sortedRecords);
   };
 
-
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`px-3 py-1 rounded-md ${
+            currentPage === i ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"
+          } hover:bg-gray-300`}
+        >
+          {i}
+        </button>
+      );
+    }
+    return pageNumbers;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -155,6 +227,12 @@ const SalesRecordPage = () => {
         {/* Page Header */}
         <PageHeader title="Sales Record" onMenuClick={() => setSidebarOpen(true)} />
 
+        {/* Filter Component */}
+<FilterComponent 
+  columns={filterColumns} 
+  onFilter={fetchSalesRecords} 
+  initialData={salesRecords}
+/>
         {/* Sales Record Section */}
         <section className="container mx-auto px-4 py-6">
           {/* Notification */}
@@ -224,7 +302,7 @@ const SalesRecordPage = () => {
                     </td>
                   </tr>
                 ) : (
-                  salesRecords.map((record) => (
+                  paginatedRecords.map((record) => (
                     <tr key={record.id} className="border-b border-gray-400">
                       {editingRecordId === record.id ? (
                         <>
@@ -358,6 +436,31 @@ const SalesRecordPage = () => {
                 </tfoot>
               )}
             </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center mt-4 lg:">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
+              >
+                &lt;
+              </button>
+              {renderPageNumbers()}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
+              >
+                &gt;
+              </button>
+            </div>
+            <div className="text-gray-700">
+              Results: {(currentPage - 1) * recordsPerPage + 1} -{" "}
+              {Math.min(currentPage * recordsPerPage, salesRecords.length)} of {salesRecords.length}
+            </div>
           </div>
 
           {/* Record Sales Button */}

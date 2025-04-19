@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getAllUsers } from "../User/UserService";
-import { LoadingAnimation, Notification } from "../../components/CommonComponents";
+import { LoadingAnimation, Notification, PageHeader, Search } from "../../components/CommonComponents";
 import { FiTrash2, FiPlus, FiCheck, FiX } from "react-icons/fi";
 import AdminSidebar from "../../components/AdminSidebar";
 import edit from "../../images/edit.svg";
@@ -24,10 +24,10 @@ const InvestmentPage = () => {
   const [editingId, setEditingId] = useState(null);
   const [editingExpenseId, setEditingExpenseId] = useState(null);
 
-  const fetchInvestments = async () => {
+  const fetchInvestments = async (queryString ="") => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_INVESTMENT}?page=1&pageSize=100`);
+      const response = await fetch(`${API_INVESTMENT}${queryString ? `?${queryString}` : ""}`);
       const data = await response.json();
       setInvestments(data.content || []);
     } catch (error) {
@@ -37,10 +37,10 @@ const InvestmentPage = () => {
     }
   };
 
-  const fetchExpenses = async () => {
+  const fetchExpenses = async (queryString ="") => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_EXPENSES}?page=1&pageSize=100`);
+      const response = await fetch(`${API_EXPENSES}${queryString ? `?${queryString}` : ""}`);
       const data = await response.json();
       setExpenses(data.content || []);
     } catch (error) {
@@ -273,8 +273,14 @@ const InvestmentPage = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       <AdminSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      {/* Page Header */}
+      <PageHeader title="Investment & Expenses" onMenuClick={() => setSidebarOpen(true)} />
 
       <main className="flex-grow container mx-auto px-4 py-6">
+        <div className="flex justify-between items-center mb-auto">
+                  <Search onSearch={fetchInvestments} />
+        </div>
+        
         {notification && <Notification notification={notification} />}
 
         {/* Investment Table */}
@@ -480,6 +486,10 @@ const InvestmentPage = () => {
               </tbody>
             </table>
           </div>
+        </div>
+        
+        <div className="flex justify-between items-center mb-auto">
+                  <Search onSearch={fetchExpenses} />
         </div>
 
         {/* Expenses Table */}

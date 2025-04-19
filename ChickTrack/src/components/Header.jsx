@@ -93,6 +93,16 @@ const Header = () => {
     }
   }, [profileAccordionOpen]);
 
+  useEffect(() => {
+    const header = document.querySelector("header");
+    if (header) {
+      document.body.style.paddingBottom = `${header.offsetHeight}px`;
+    }
+    return () => {
+      document.body.style.paddingBottom = "0px";
+    };
+  }, []);
+
   return (
     <header className="bg-gray-800 shadow-sm py-4 px-6 flex flex-col fixed bottom-0 w-full lg:sticky lg:top-0 z-50">
       <div className="flex justify-between items-center">
