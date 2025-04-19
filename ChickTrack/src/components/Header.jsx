@@ -59,7 +59,7 @@ const Header = () => {
   const profileLinks = [
     { name: "Profile", action: () => navigate("/profile") },
     { name: "Investors", action: () => navigate("/investors") },
-    { name: "Setup", action: () => navigate("/setup") },
+    { name: "Setup", action: () => navigate("/users") },
     { name: "Logout", action: () => navigate("/logout") },
   ];
 

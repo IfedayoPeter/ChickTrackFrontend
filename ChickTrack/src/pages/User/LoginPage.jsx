@@ -43,6 +43,9 @@ const LoginPage = () => {
         type: 'error',
         message: err.response?.data?.message || 'Login failed. Please try again.'
       });
+      setTimeout(() => {
+        setNotification(null);
+      }, 1000);
     } finally {
       setLoading(false);
     }

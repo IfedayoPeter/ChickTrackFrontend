@@ -10,6 +10,7 @@ import FeedLogPage from "./pages/Feed/FeedLogPage";
 import AdminHomePage from "./pages/Admin/AdminHomePage";
 import InvestmentPage from "./pages/Financials/InvestmentPage";
 import ExamplePage from "./pages/ExamplePage";
+import UserPage from "./pages/User/UserPage";
 
 const App = () => {
   return (
@@ -26,6 +27,7 @@ const App = () => {
         <Route path="/investment" element={<InvestmentPage />} />
         <Route path="/admin/home" element={<AdminHomePage />} />
         <Route path="/example" element={<ExamplePage />} />
+        <Route path="/users" element={<UserPage />} />
         {/* Add more routes as needed */}
       </Routes>
     </Router>

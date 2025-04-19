@@ -13,11 +13,11 @@ export const createUser = async (userData) => {
   }
 };
 
-// Function to get all users
 export const getAllUsers = async (page = 1, pageSize = 10) => {
   try {
     const response = await axios.get(`${BASE_URL}?page=${page}&pageSize=${pageSize}`);
-    return response.data;
+    // Return just the data array from the response
+    return response.data.content.data;
   } catch (error) {
     console.error('Error fetching users:', error);
     throw error;
@@ -31,6 +31,17 @@ export const getUserById = async (userId) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching user by ID:', error);
+    throw error;
+  }
+};
+
+// Function to delete a user by ID
+export const deleteUserById = async (userId) => {
+  try {
+    const response = await axios.delete(`${BASE_URL}/delete/${userId}`); // Changed to DELETE method
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting user by ID:', error);
     throw error;
   }
 };
