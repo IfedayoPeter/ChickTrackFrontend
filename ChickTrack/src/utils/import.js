@@ -27,6 +27,7 @@ const excelToJson = (file) => {
                     ...record,
                     code: '', // Add code field as an empty string
                     amount: parseFloat(record.amount || 0).toFixed(2), // Ensure amount is a decimal
+                    price: parseFloat(record.price || 0).toFixed(2), // Ensure prce is a decimal
                     bagsBought: parseFloat(record.bagsBought || 0).toFixed(2), // Ensure bagsBought is a decimal
                     date: formattedDate, // Convert Excel date to ISO string
                 };
