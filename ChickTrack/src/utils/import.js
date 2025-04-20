@@ -1,3 +1,4 @@
+import { Descriptions } from 'antd';
 import axios from 'axios';
 import * as XLSX from 'xlsx'; // Updated to use named import
 
@@ -23,13 +24,20 @@ const excelToJson = (file) => {
                     ? `${parsedDate.y}-${String(parsedDate.m).padStart(2, '0')}-${String(parsedDate.d).padStart(2, '0')}`
                     : null;
 
+                if (!record.feedSalesUnitId) {
+                    console.warn('Record with null feedSalesUnitId:', record);
+                }
+
                 return {
                     ...record,
                     code: '', // Add code field as an empty string
                     amount: parseFloat(record.amount || 0).toFixed(2), // Ensure amount is a decimal
-                    price: parseFloat(record.price || 0).toFixed(2), // Ensure prce is a decimal
+                    price: parseFloat(record.price || 0).toFixed(2), // Ensure price is a decimal
                     bagsBought: parseFloat(record.bagsBought || 0).toFixed(2), // Ensure bagsBought is a decimal
                     date: formattedDate, // Convert Excel date to ISO string
+                    feedSalesUnitId: record.feedSalesUnitId || null, // Allow feedSalesUnitId to be null
+                    description: record.description || '', // Ensure Description is a string
+                    buyerName: record.buyerName || '', // Ensure Buyer Name is a string
                 };
             });
 
