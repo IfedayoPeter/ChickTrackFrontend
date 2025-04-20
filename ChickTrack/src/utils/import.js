@@ -20,7 +20,7 @@ const excelToJson = (file) => {
             const processedData = json.map((record) => {
                 const parsedDate = XLSX.SSF.parse_date_code(record.date);
                 const formattedDate = parsedDate
-                    ? `${parsedDate.y}-${String(parsedDate.m).padStart(2, '0')}-${String(parsedDate.d).padStart(2, '0')}T${String(parsedDate.H).padStart(2, '0')}:${String(parsedDate.M).padStart(2, '0')}:${String(parsedDate.S).padStart(2, '0')}`
+                    ? `${parsedDate.y}-${String(parsedDate.m).padStart(2, '0')}-${String(parsedDate.d).padStart(2, '0')}`
                     : null;
 
                 return {
