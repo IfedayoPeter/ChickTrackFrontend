@@ -15,7 +15,8 @@ import FilterComponent from "../../components/FilterComponent";
 const API_URL = "https://chicktrack.runasp.net/api/SaleRecord"; 
 
 const SalesRecordPage = () => {
-  const [salesRecords, setSalesRecords] = useState([]);
+  const [allSalesRecords, setAllSalesRecords] = useState([]);
+  const [displayedRecords, setDisplayedRecords] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
@@ -23,62 +24,65 @@ const SalesRecordPage = () => {
   const [editingRecordId, setEditingRecordId] = useState(null);
   const [newSalesRecord, setNewSalesRecord] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreData, setHasMoreData] = useState(true);
   const recordsPerPage = 20;
+  const apiPageSize = 20000;
 
-  const totalPages = Math.ceil(salesRecords.length / recordsPerPage);
+  const totalPages = Math.ceil(allSalesRecords.length / recordsPerPage);
 
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  const paginatedRecords = salesRecords.slice(
-    (currentPage - 1) * recordsPerPage,
-    currentPage * recordsPerPage
-  );
-
-  // const fetchSalesRecords = async (queryString = "") => {
-  //   setLoading(true);
-  //   try {
-  //     const response = await fetch(`${API_URL}${queryString ? `?${queryString}` : ""}`);
-  //     const data = await response.json();
-  //     setSalesRecords(data.content || []);
-  //   } catch (error) {
-  //     console.error("Error fetching sales records:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  const fetchSalesRecords = async (filters = {}) => {
+  const fetchSalesRecords = async (page = 1) => {
     setLoading(true);
     try {
-      // Convert filters to query parameters
-      const queryParams = new URLSearchParams();
-      
-      // Add each filter to the query parameters
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) {
-          if (key === 'date' && Array.isArray(value)) {
-            // Handle date range filter
-            const [start, end] = value;
-            if (start) queryParams.append('startDate', start.toISOString());
-            if (end) queryParams.append('endDate', end.toISOString());
-          } else {
-            // Handle other filters
-            queryParams.append(key, value);
-          }
-        }
-      });
-  
-      const response = await fetch(`${API_URL}?${queryParams.toString()}`);
+      const response = await fetch(`${API_URL}?page=${page}&pageSize=${apiPageSize}`);
       const data = await response.json();
-      setSalesRecords(data.content || []);
+      
+      if (data.content && data.content.length > 0) {
+        // Use Set to ensure unique records by ID
+        setAllSalesRecords(prev => {
+          const newRecords = data.content.filter(
+            newRecord => !prev.some(existingRecord => existingRecord.id === newRecord.id)
+          );
+          return [...prev, ...newRecords];
+        });
+        
+        if (data.content.length < apiPageSize) {
+          setHasMoreData(false);
+        }
+      } else {
+        setHasMoreData(false);
+      }
     } catch (error) {
       console.error("Error fetching sales records:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    fetchSalesRecords(1); // Start with page 1
+  }, []);
+
+  // Load more data when needed
+  useEffect(() => {
+    if (hasMoreData && 
+        currentPage * recordsPerPage > allSalesRecords.length && 
+        allSalesRecords.length % apiPageSize === 0) {
+      const nextApiPage = Math.floor(allSalesRecords.length / apiPageSize) + 1;
+      fetchSalesRecords(nextApiPage);
+    }
+  }, [currentPage, allSalesRecords.length, hasMoreData]);
+
+  // Update displayed records
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    setDisplayedRecords(allSalesRecords.slice(startIndex, endIndex));
+  }, [currentPage, allSalesRecords]);
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
     }
   };
 
@@ -95,7 +99,7 @@ const SalesRecordPage = () => {
     setLoading(true);
     setNotification(null);
     try {
-      const response = await fetch(`https://chicktrack.runasp.net/api/SaleRecord?id=${deleteId}`, {
+      const response = await fetch(`${API_URL}?id=${deleteId}`, {
         method: "DELETE",
       });
 
@@ -132,14 +136,12 @@ const SalesRecordPage = () => {
   };
 
   const handleSaveSalesRecord = async () => {
-    // Ensure feedBrand and feedSalesUnitId are integers
     const updatedSalesRecord = {
       ...newSalesRecord,
       feedBrand: parseInt(newSalesRecord.feedBrand, 10),
       feedSalesUnitId: parseInt(newSalesRecord.feedSalesUnitId, 10),
     };
 
-    // Prevent negative values for quantity and price
     if (updatedSalesRecord.quantity < 0 || updatedSalesRecord.price < 0) {
       setNotification({
         type: "error",
@@ -149,9 +151,7 @@ const SalesRecordPage = () => {
     }
 
     const method = updatedSalesRecord.id ? "PUT" : "POST";
-    const url = updatedSalesRecord.id
-      ? `${API_URL}?id=${updatedSalesRecord.id}`
-      : API_URL;
+    const url = updatedSalesRecord.id ? `${API_URL}?id=${updatedSalesRecord.id}` : API_URL;
 
     try {
       const response = await fetch(url, {
@@ -186,18 +186,25 @@ const SalesRecordPage = () => {
     }
   };
 
-  useEffect(() => {
-    fetchSalesRecords();
-  }, []);
-
   const calculateTotalAmount = () => {
-    return salesRecords.reduce((total, record) => total + record.price, 0);
+    return allSalesRecords.reduce((total, record) => total + record.price, 0);
   };
 
   const handleSort = (order) => {
-    const sortedRecords = sortByDate([...salesRecords], order);
-    setSalesRecords(sortedRecords);
+    const sortedRecords = sortByDate([...allSalesRecords], order);
+    setAllSalesRecords(sortedRecords);
   };
+
+  const handleSortButton = (order) => {
+    const sortedRecords = sortByDate([...allSalesRecords], order);
+    setAllSalesRecords(sortedRecords);
+    setDisplayedRecords(sortedRecords.slice((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage));
+  };
+
+  // Ensure sorting is applied on initial load
+  useEffect(() => {
+    handleSort("desc");
+  }, [allSalesRecords]);
 
   const renderPageNumbers = () => {
     const pageNumbers = [];
@@ -221,24 +228,18 @@ const SalesRecordPage = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       <main className="flex-grow container mx-auto lg:px-4 lg:py-6">
-        {/* Sidebar */}
         <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-        {/* Page Header */}
         <PageHeader title="Sales Record" onMenuClick={() => setSidebarOpen(true)} />
 
-        {/* Filter Component */}
-<FilterComponent 
-  columns={filterColumns} 
-  onFilter={fetchSalesRecords} 
-  initialData={salesRecords}
-/>
-        {/* Sales Record Section */}
+        <FilterComponent 
+          columns={filterColumns} 
+          onFilter={fetchSalesRecords} 
+          initialData={allSalesRecords}
+        />
+
         <section className="container mx-auto px-4 py-6">
-          {/* Notification */}
           {notification && <Notification notification={notification} />}
 
-          {/* Delete Confirmation */}
           {deleteId && (
             <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded-lg shadow-lg text-center">
@@ -261,18 +262,17 @@ const SalesRecordPage = () => {
             </div>
           )}
 
-          {/* Sort and Search Buttons */}
           <div className="flex justify-between items-center mb-4">
             <Search onSearch={fetchSalesRecords} />
             <div className="flex gap-2 mb-4">
               <button
-                onClick={() => handleSort("asc")}
+                onClick={() => handleSortButton("asc")}
                 className="flex items-center gap-2 bg- text-gray-800 px-4 py-2 rounded-l-md hover:bg-gray-300"
               >
                 <img src={ascendingIcon} alt="Ascending" className="w-6 h-6" />
               </button>
               <button
-                onClick={() => handleSort("desc")}
+                onClick={() => handleSortButton("desc")}
                 className="flex items-center gap-2 bg-transparent text-gray-800 px-4 py-2 rounded-r-md hover:bg-gray-300"
               >
                 <img src={descendingIcon} alt="Descending" className="w-6 h-6" />
@@ -280,7 +280,6 @@ const SalesRecordPage = () => {
             </div>
           </div>
 
-          {/* Sales Table */}
           <div className="overflow-x-auto bg-white shadow-md rounded-lg">
             <table className="min-w-full text-sm text-left text-gray-500">
               <thead className="bg-gray-200 text-gray-700 uppercase text-xs">
@@ -297,12 +296,12 @@ const SalesRecordPage = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td className="px-4 py-2 text-center" colSpan="7">
+                    <td colSpan="7" className="px-4 py-2 text-center">
                       <LoadingAnimation />
                     </td>
                   </tr>
                 ) : (
-                  paginatedRecords.map((record) => (
+                  displayedRecords.map((record) => (
                     <tr key={record.id} className="border-b border-gray-400">
                       {editingRecordId === record.id ? (
                         <>
@@ -429,17 +428,16 @@ const SalesRecordPage = () => {
               {!loading && (
                 <tfoot>
                   <tr className="bg-gray-200 font-bold border-t border-gray-400">
-                    <td className="px-4 py-2" colSpan="3">Total</td> {/* Adjust colspan */}
-                    <td className="px-4 py-2 text-left">₦{calculateTotalAmount().toLocaleString()}</td> {/* Align under Amount */}
-                    <td className="px-4 py-2" colSpan="3"></td> {/* Empty columns */}
+                    <td className="px-4 py-2" colSpan="3">Total</td>
+                    <td className="px-4 py-2 text-left">₦{calculateTotalAmount().toLocaleString()}</td>
+                    <td className="px-4 py-2" colSpan="3"></td>
                   </tr>
                 </tfoot>
               )}
             </table>
           </div>
 
-          {/* Pagination */}
-          <div className="flex justify-between items-center mt-4 lg:">
+          <div className="flex justify-between items-center mt-4">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
@@ -459,11 +457,10 @@ const SalesRecordPage = () => {
             </div>
             <div className="text-gray-700">
               Results: {(currentPage - 1) * recordsPerPage + 1} -{" "}
-              {Math.min(currentPage * recordsPerPage, salesRecords.length)} of {salesRecords.length}
+              {Math.min(currentPage * recordsPerPage, allSalesRecords.length)} of {allSalesRecords.length}
             </div>
           </div>
 
-          {/* Record Sales Button */}
           {!loading && (
             <div className="flex justify-center mt-6">
               <button
