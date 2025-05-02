@@ -284,23 +284,13 @@ useEffect(() => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50 overflow-x-hidden">
       <Header />
       <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <PageHeader title="Sales Record" onMenuClick={() => setSidebarOpen(true)} />
-      <main className="flex-grow container mx-auto px-4 py-6">
-        
 
-        {/* <FilterComponent 
-        columns={filterColumns} 
-        onFilter={(queryString) => {
-          searchSalesRecords(queryString);
-          setCurrentPage(1); // Reset to first page when filtering
-        }} 
-        initialData={allSalesRecords}
-      /> */}
-
-        <section className="container mx-auto px-4 py-6">
+      <main className="flex-grow container mx-auto px-4 py-6 lg:px-4 lg:py-6 w-full">
+        <section className="container mx-auto px-4 py-6 w-full">
           {notification && <Notification notification={notification} />}
 
           {deleteId && (
