@@ -27,8 +27,13 @@ const SalesRecordPage = () => {
   const [hasMoreData, setHasMoreData] = useState(true);
   const recordsPerPage = 20;
   const apiPageSize = 20000;
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [currentSort, setCurrentSort] = useState("desc");
 
-  const totalPages = Math.ceil(allSalesRecords.length / recordsPerPage);
+  const totalPages = Math.ceil(
+    (isSearching ? searchResults.length : allSalesRecords.length) / recordsPerPage
+  );
 
   const fetchSalesRecords = async (page = 1) => {
     setLoading(true);
@@ -58,6 +63,30 @@ const SalesRecordPage = () => {
     }
   };
 
+  const searchSalesRecords = async (queryString = "") => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}${queryString ? `?${queryString}` : ""}`);
+      const data = await response.json();
+      
+      if (queryString) {
+        setIsSearching(true);
+        setSearchResults(data.content || []);
+        return data.content && data.content.length > 0; // Return true if results found
+      } else {
+        setIsSearching(false);
+        fetchSalesRecords(1);
+        return true; // Return true when showing all records
+      }
+    } catch (error) {
+      console.error("Error fetching sales records:", error);
+      setNotification({ type: "error", message: "Failed to search records" });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Initial fetch
   useEffect(() => {
     fetchSalesRecords(1); // Start with page 1
@@ -73,12 +102,14 @@ const SalesRecordPage = () => {
     }
   }, [currentPage, allSalesRecords.length, hasMoreData]);
 
-  // Update displayed records
-  useEffect(() => {
-    const startIndex = (currentPage - 1) * recordsPerPage;
-    const endIndex = startIndex + recordsPerPage;
-    setDisplayedRecords(allSalesRecords.slice(startIndex, endIndex));
-  }, [currentPage, allSalesRecords]);
+  // displayed records
+useEffect(() => {
+  const startIndex = (currentPage - 1) * recordsPerPage;
+  const endIndex = startIndex + recordsPerPage;
+  
+  const recordsToDisplay = isSearching ? searchResults : allSalesRecords;
+  setDisplayedRecords(recordsToDisplay.slice(startIndex, endIndex));
+}, [currentPage, allSalesRecords, searchResults, isSearching]);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -86,14 +117,14 @@ const SalesRecordPage = () => {
     }
   };
 
-  const filterColumns = [
-    { title: 'Brands', dataIndex: 'feedBrandName', key: 'feedBrandName' },
-    { title: 'Unit', dataIndex: 'feedSalesUnit.unitName', key: 'unit' },
-    { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
-    { title: 'Price', dataIndex: 'price', key: 'price' },
-    { title: 'Buyer', dataIndex: 'buyerName', key: 'buyerName' },
-    { title: 'Date', dataIndex: 'date', key: 'date' },
-  ];
+  // const filterColumns = [
+  //   { title: 'Brands', dataIndex: 'feedBrandName', key: 'feedBrandName' },
+  //   { title: 'Unit', dataIndex: 'feedSalesUnit.unitName', key: 'unit' },
+  //   { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
+  //   { title: 'Price', dataIndex: 'price', key: 'price' },
+  //   { title: 'Buyer', dataIndex: 'buyerName', key: 'buyerName' },
+  //   { title: 'Date', dataIndex: 'date', key: 'date' },
+  // ];
 
   const handleDeleteRow = async () => {
     setLoading(true);
@@ -187,24 +218,52 @@ const SalesRecordPage = () => {
   };
 
   const calculateTotalAmount = () => {
-    return allSalesRecords.reduce((total, record) => total + record.price, 0);
+    const records = isSearching ? searchResults : allSalesRecords;
+    return records.reduce((total, record) => total + record.price, 0);
   };
 
   const handleSort = (order) => {
-    const sortedRecords = sortByDate([...allSalesRecords], order);
-    setAllSalesRecords(sortedRecords);
+    const recordsToSort = isSearching ? [...searchResults] : [...allSalesRecords];
+    const sortedRecords = sortByDate(recordsToSort, order);
+    
+    if (isSearching) {
+      setSearchResults(sortedRecords);
+    } else {
+      setAllSalesRecords(sortedRecords);
+    }
+    
+    // Update displayed records
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    setDisplayedRecords(sortedRecords.slice(startIndex, endIndex));
   };
 
   const handleSortButton = (order) => {
-    const sortedRecords = sortByDate([...allSalesRecords], order);
-    setAllSalesRecords(sortedRecords);
-    setDisplayedRecords(sortedRecords.slice((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage));
+    setCurrentSort(order);
+    // Determine which records to sort (search results or all records)
+    const recordsToSort = isSearching ? [...searchResults] : [...allSalesRecords];
+    
+    // Sort the records
+    const sortedRecords = sortByDate(recordsToSort, order);
+    
+    // Update the appropriate state based on whether we're searching
+    if (isSearching) {
+      setSearchResults(sortedRecords);
+    } else {
+      setAllSalesRecords(sortedRecords);
+    }
+    
+    // Reset to first page when sorting
+    setCurrentPage(1);
+    
+    // Update displayed records
+    setDisplayedRecords(sortedRecords.slice(0, recordsPerPage));
   };
 
   // Ensure sorting is applied on initial load
-  useEffect(() => {
-    handleSort("desc");
-  }, [allSalesRecords]);
+  // useEffect(() => {
+  //   handleSort("desc");
+  // }, [allSalesRecords]);
 
   const renderPageNumbers = () => {
     const pageNumbers = [];
@@ -227,15 +286,19 @@ const SalesRecordPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="flex-grow container mx-auto lg:px-4 lg:py-6">
-        <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-        <PageHeader title="Sales Record" onMenuClick={() => setSidebarOpen(true)} />
+      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <PageHeader title="Sales Record" onMenuClick={() => setSidebarOpen(true)} />
+      <main className="flex-grow container mx-auto px-4 py-6">
+        
 
-        <FilterComponent 
-          columns={filterColumns} 
-          onFilter={fetchSalesRecords} 
-          initialData={allSalesRecords}
-        />
+        {/* <FilterComponent 
+        columns={filterColumns} 
+        onFilter={(queryString) => {
+          searchSalesRecords(queryString);
+          setCurrentPage(1); // Reset to first page when filtering
+        }} 
+        initialData={allSalesRecords}
+      /> */}
 
         <section className="container mx-auto px-4 py-6">
           {notification && <Notification notification={notification} />}
@@ -263,19 +326,26 @@ const SalesRecordPage = () => {
           )}
 
           <div className="flex justify-between items-center mb-4">
-            <Search onSearch={fetchSalesRecords} />
+          <Search onSearch={(query) => {
+            searchSalesRecords(query);
+            setCurrentPage(1); // Reset to first page when searching
+          }} />
             <div className="flex gap-2 mb-4">
               <button
-                onClick={() => handleSortButton("asc")}
-                className="flex items-center gap-2 bg- text-gray-800 px-4 py-2 rounded-l-md hover:bg-gray-300"
-              >
-                <img src={ascendingIcon} alt="Ascending" className="w-6 h-6" />
+              onClick={() => handleSortButton("desc")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-r-md hover:bg-gray-300 ${
+                currentSort === "desc" ? "bg-gray-300" : ""
+              }`}
+            >
+                <img src={descendingIcon} alt="Descending" className="w-6 h-6" />
               </button>
               <button
-                onClick={() => handleSortButton("desc")}
-                className="flex items-center gap-2 bg-transparent text-gray-800 px-4 py-2 rounded-r-md hover:bg-gray-300"
-              >
-                <img src={descendingIcon} alt="Descending" className="w-6 h-6" />
+              onClick={() => handleSortButton("asc")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-l-md hover:bg-gray-300 ${
+                currentSort === "asc" ? "bg-gray-300" : ""
+              }`}
+            >
+                <img src={ascendingIcon} alt="Ascending" className="w-6 h-6" />
               </button>
             </div>
           </div>
@@ -455,10 +525,14 @@ const SalesRecordPage = () => {
                 &gt;
               </button>
             </div>
+            {/* results displayed */}
             <div className="text-gray-700">
-              Results: {(currentPage - 1) * recordsPerPage + 1} -{" "}
-              {Math.min(currentPage * recordsPerPage, allSalesRecords.length)} of {allSalesRecords.length}
-            </div>
+            Results: {(currentPage - 1) * recordsPerPage + 1} -{" "}
+            {Math.min(
+              currentPage * recordsPerPage, 
+              isSearching ? searchResults.length : allSalesRecords.length
+            )} of {isSearching ? searchResults.length : allSalesRecords.length}
+          </div>
           </div>
 
           {!loading && (

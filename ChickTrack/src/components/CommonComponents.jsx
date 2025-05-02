@@ -59,19 +59,24 @@ export const Search = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [notification, setNotification] = useState(null);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     const queryString = searchTerm ? `search=${encodeURIComponent(searchTerm)}` : "";
-    const found = onSearch(queryString); // Assume this returns true if found, false if not
-
-    if (!found) {
+    try {
+      const found = await onSearch(queryString); // Wait for the search to complete
+      
+      // if (searchTerm && !found) {
+      //   setNotification({
+      //     type: "error",
+      //     message: `No results found for "${searchTerm}"`,
+      //   });
+      //   setTimeout(() => setNotification(null), 3000);
+      // }
+    } catch (error) {
       setNotification({
         type: "error",
-        message: `"${searchTerm}" not found.`,
+        message: "Search failed. Please try again.",
       });
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000); // Give the user 2 seconds to read the notification
+      setTimeout(() => setNotification(null), 3000);
     }
   };
 
@@ -82,7 +87,7 @@ export const Search = ({ onSearch }) => {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search"
+          placeholder="Search by BrandName"
           className="w-60 px-4 py-2 border border-blue-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 pr-16"
         />
         <button
