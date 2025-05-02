@@ -324,7 +324,7 @@ useEffect(() => {
               <button
               onClick={() => handleSortButton("desc")}
               className={`flex items-center gap-2 px-4 py-2 rounded-r-md hover:bg-gray-300 ${
-                currentSort === "desc" ? "bg-gray-300" : ""
+                currentSort === "desc" ? "bg-transparent" : ""
               }`}
             >
                 <img src={descendingIcon} alt="Descending" className="w-6 h-6" />
@@ -332,7 +332,7 @@ useEffect(() => {
               <button
               onClick={() => handleSortButton("asc")}
               className={`flex items-center gap-2 px-4 py-2 rounded-l-md hover:bg-gray-300 ${
-                currentSort === "asc" ? "bg-gray-300" : ""
+                currentSort === "asc" ? "bg-transparent" : ""
               }`}
             >
                 <img src={ascendingIcon} alt="Ascending" className="w-6 h-6" />
